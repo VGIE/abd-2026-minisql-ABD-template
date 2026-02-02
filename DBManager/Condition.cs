@@ -24,7 +24,7 @@ namespace DbManager
 
         public bool IsTrue(string value, ColumnDefinition.DataType type)
         {
-            
+
             //TODO DEADLINE 1A: return true if the condition is true for this value
             //Depending on the type of the column, the comparison should be different:
             //"ab" < "cd
@@ -33,6 +33,17 @@ namespace DbManager
             //Convert first the strings to the appropriate type and
             //then compare (depending on the operator of the condition)
 
+            switch (type) {
+                case ColumnDefinition.DataType.String:
+
+                case ColumnDefinition.DataType.Int:
+                    int v = int.Parse(value);
+                    break;
+                case ColumnDefinition.DataType.Double:
+                    double v2 = double.Parse(value);
+                    break;
+            }
+                
             
             return false;
             

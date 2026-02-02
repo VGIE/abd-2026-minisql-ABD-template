@@ -100,7 +100,7 @@ namespace DbManager
             //TODO DEADLINE 1.A: Return the zero-based index of the column named columnName
             for(int i=0; i<ColumnDefinitions.Count; i++)
             {
-                if(ColumnDefinitions[i].Name==column)
+                if(ColumnDefinitions[i].Name==columnName)
                 {
                     return i;
 
@@ -145,7 +145,7 @@ namespace DbManager
 
                 for(int col=0; col<ColumnDefinitions.Count;col++)
                 {
-                    result+= "'" + Rows[row][col] + "'";
+                    result+= "'" + Rows[] + "'";
 
                     if(col<ColumnDefinitions.Count-1)
                     {
@@ -167,10 +167,15 @@ namespace DbManager
         {
             //TODO DEADLINE 1.A: Delete the i-th row. If there is no i-th row, do nothing
 
-            
+            int a = 0;
                 if(row>=0 || row<Rows.Count)
                 {
-                    Rows.DeleteIthRow(row);
+                    foreach(Row r in Rows)
+                    {
+                    if (a==row) { Rows.Remove(r);}
+                    a++;
+                    }
+                    
 
                 }    
         }
@@ -230,11 +235,11 @@ namespace DbManager
             {
                 if(condition == null || Rows[i].IsTrue(condition))
                 {
-                    Row newRow= new Row(newC.Count);
+                    Row newRow= new Row(newC,values);
                     for(int c=0; c<newC.Count; c++)
                     {
                         int originalI= ColumnIndexByName(newC[c].Name);
-                        newRow[c]= Rows[i][originalI];
+                        newRow.SetValue(newC[c].Name, [originalI]);
                     }
                     Result.AddRow(newRow);
 
@@ -254,12 +259,7 @@ namespace DbManager
                 return false; 
  
             }
-            Row newRow= new Row(ColumnDefinitions.Count);
-
-            for(int i=0; i<values.Count; i++)
-            {
-                newRow[i]= values[i];
-            }
+            Row newRow= new Row(ColumnDefinitions,values);
 
             AddRow(newRow);
 
@@ -284,7 +284,7 @@ namespace DbManager
                     int colInd= ColumnIndexByName(set.ColumnName);
                     if(colInd>=0)
                     {
-                        Rows[i][colInd]= set.Value;
+                        Rows[i].SetValue(set);
                     }
                 }
             }

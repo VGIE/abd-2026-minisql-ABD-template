@@ -1,6 +1,7 @@
 using DbManager.Parser;
 using System;
 using System.Collections.Generic;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,9 +55,16 @@ namespace DbManager
 
         public bool IsTrue(Condition condition)
         {
+            
+            string comprobar = condition.LiteralValue;
+            string nombreCol= condition.ColumnName;
+            ColumnDefinition.DataType type = DataTypeUtils.FromMiniTypeName(comprobar);
+            string a = GetValue(nombreCol);
+
             //TODO DEADLINE 1.A: Given a condition (column name, operator and literal value, return whether it is true or not
             //for this row. Check Condition.IsTrue method
-            return condition.IsTrue();
+
+            return condition.IsTrue(a,type);
             
         }
 
@@ -104,8 +112,13 @@ namespace DbManager
         public static Row Parse(List<ColumnDefinition> columns, string value)
         {
             //TODO DEADLINE 1.C: Parse a rowReturn the row as string with all values separated by the delimiter
+
+            string[] ret=new string[columns.Count];
             
-            return null;
+            ret = value.Split(Delimiter);
+            List<String> r = ret.ToList();
+            //hacer el tolist a mano
+            return new Row(columns,r);
             
         }
     }
