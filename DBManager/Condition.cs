@@ -31,10 +31,31 @@ namespace DbManager
             //"9" > "10"
             //9 < 10
             //Convert first the strings to the appropriate type and then compare (depending on the operator of the condition)
+            int intValue;
+            double doubleValue;
+
+
+            switch (type)
+            {
+                case ColumnDefinition.DataType.String:
+                return false;
+
+                case ColumnDefinition.DataType.Int:
+                if (int.TryParse(value, out  intValue))
+                {
+                // if(intValue > type)
+                 
+                    return false;
+                 }
+                 
+
+                case ColumnDefinition.DataType.Double:
+                return false;
+            
 
             
             return false;
             
+            }
+    
         }
-    }
-}
