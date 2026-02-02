@@ -1,6 +1,7 @@
 using DbManager.Parser;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DbManager
 {
@@ -14,28 +15,41 @@ namespace DbManager
         public Table(string name, List<ColumnDefinition> columns)
         {
             //TODO DEADLINE 1.A: Initialize member variables
+            Name = name;
+            ColumnDefinitions = columns;
             
         }
 
         public Row GetRow(int i)
         {
             //TODO DEADLINE 1.A: Return the i-th row
-            
-            return null;
+
+            if (i >= 0 && i < Rows.Count)
+            {
+                return Rows[i];
+            }
+            else
+            {
+                return null;
+   
+            }    
             
         }
 
         public void AddRow(Row row)
         {
             //TODO DEADLINE 1.A: Add a new row
-            
+            if (row != null)
+            {
+                Rows.Add(row);
+            }
         }
-
+]
         public int NumRows()
         {
             //TODO DEADLINE 1.A: Return the number of rows
-            
-            return 0;
+            int numero = Rows.Count;
+            return numero;
             
         }
 
@@ -43,25 +57,43 @@ namespace DbManager
         {
             //TODO DEADLINE 1.A: Return the i-th column
             
-            return null;
-            
+            if (i >= 0 && i < ColumnDefinitions.Count)
+            {
+                return ColumnDefinitions[i];
+            }
+            else
+            {
+                return null;
+   
+            }               
         }
 
         public int NumColumns()
         {
             //TODO DEADLINE 1.A: Return the number of columns
             
-            return 0;
-            
+            int numero = ColumnDefinitions.Count;
+            return numero;            
         }
         
         public ColumnDefinition ColumnByName(string column)
         {
             //TODO DEADLINE 1.A: Return the number of columns
             
-            return null;
-            
+            if(column != null)
+            {
+                foreach (ColumnDefinition col in ColumnDefinitions)
+                {
+                    if (col.Name == column)
+                    {
+                        return col;
+                    }
+                }
+            }
+
+            return null;          
         }
+        
         public int ColumnIndexByName(string columnName)
         {
             //TODO DEADLINE 1.A: Return the zero-based index of the column named columnName
