@@ -58,14 +58,27 @@ namespace DbManager
         public ColumnDefinition ColumnByName(string column)
         {
             //TODO DEADLINE 1.A: Return the number of columns
-            
+            foreach (ColumnDefinition col in ColumnDefinitions)
+            {
+                if (col.Name == column)
+                {
+                    return col;
+                }
+            }
+
             return null;
             
         }
         public int ColumnIndexByName(string columnName)
         {
             //TODO DEADLINE 1.A: Return the zero-based index of the column named columnName
-            
+            for ( int i = 0; i< ColumnDefinitions.Count; i++)
+            {
+                if (ColumnDefinitions[i].Name == columnName)
+                {
+                    return i;
+                }
+            }
             return -1;
             
         }
@@ -79,7 +92,32 @@ namespace DbManager
             //"['Name','Age']{'Adolfo','23'}{'Jacinto','24'}" <- two columns, two rows
             //"" <- no columns, no rows
             //"['Name']" <- one column, no rows
-            
+            if(ColumnDefinitions.Count == 0 && Rows.Count == 0)
+            {
+                return "";
+            }
+
+            string result = "[";
+            for(int i = 0; i< ColumnDefinitions.Count; i++)
+            {
+                result += "'" + ColumnDefinitions[i].Name + "'";
+
+                if(i < ColumnDefinitions.Count - 1)
+                {
+                    result += ",";
+                }
+            }
+            result += "]";
+
+            foreach(Row row in Rows)
+            {
+                result += "{";
+                for (int j = 0; j < row.Values.Count; j++)
+                {
+                    result += "'" + row.Values + "'";
+                }
+            }
+
             return null;
             
         }
