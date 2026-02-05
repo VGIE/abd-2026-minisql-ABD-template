@@ -33,15 +33,18 @@ namespace DbManager
         {
             //DEADLINE 1.B: Initalize the member variables
            m_username= adminUsername;
+           SecurityManager = new Manager(m_username);
 
-            
         }
 
         public bool AddTable(Table table)
         {
             //DEADLINE 1.B: Add a new table to the database
-            Tables.Add(table);
 
+            if (table == null)
+                return false;
+
+            Tables.Add(table);
             return true;
             
         }
@@ -74,15 +77,16 @@ namespace DbManager
                     LastErrorMessage= Constants.TableAlreadyExistsError;
                     return false; 
                 }
-                else if(ColumnDefinition==null)
+                else if(tableName == null || ColumnDefinition.Count() == 0)
                 {
-                    LastErrorMessage= Constants.TableAlreadyExistsError;
+                    LastErrorMessage= Constants.DatabaseCreatedWithoutColumnsError;
                     return false; 
                 }
                 else
                 {
                     Table newTable= new Table(tableName, ColumnDefinition);
-
+                    LastErrorMessage = Constants.CreateTableSuccess;
+                    return true;
                 }
 
             }

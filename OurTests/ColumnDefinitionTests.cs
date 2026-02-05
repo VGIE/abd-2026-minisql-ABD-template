@@ -1,12 +1,11 @@
 using DbManager;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OurTests
 {
     public class ColumnDefinitionsTests
     {
         //TODO DEADLINE 1A : Create your own tests for Table
-        
+
         [Fact]
         public void TestConstructor()
         {
@@ -17,15 +16,15 @@ namespace OurTests
             Assert.Equal(ColumnDefinition.DataType.String, columnString.Type);
             Assert.Equal("Nombre", columnString.Name);
 
-            Assert.Equal(ColumnDefinition.DataType.Int, columnString.Type);
+            Assert.Equal(ColumnDefinition.DataType.Int, columnInt.Type);
             Assert.Equal("Numero", columnInt.Name);
 
-            Assert.Equal(ColumnDefinition.DataType.Double, columnString.Type);
+            Assert.Equal(ColumnDefinition.DataType.Double, columnDouble.Type);
             Assert.Equal("Precio", columnDouble.Name);
 
         }
 
-       
+
         [Fact]
         public void TestAsText()
         {
@@ -70,4 +69,5 @@ namespace OurTests
         }
 
     }
+
 }
