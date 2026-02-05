@@ -116,9 +116,12 @@ namespace DbManager
             string[] ret=new string[columns.Count];
             
             ret = value.Split(Delimiter);
-            List<String> r = ret.ToList();
+            List<String> rows = new List<String>();
+            for (int i = 0; i <= ret.Count(); i++) {
+                rows[i] = ret[i];
+            }
             //hacer el tolist a mano
-            return new Row(columns,r);
+            return new Row(columns,rows);
             
         }
     }
