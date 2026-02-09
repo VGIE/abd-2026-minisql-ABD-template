@@ -44,7 +44,7 @@ namespace DbManager
                 Rows.Add(row);
             }
         }
-]
+
         public int NumRows()
         {
             //TODO DEADLINE 1.A: Return the number of rows
@@ -98,12 +98,21 @@ namespace DbManager
         {
             //TODO DEADLINE 1.A: Return the zero-based index of the column named columnName
             
-            return -1;
-            
+            if(columnName != null)
+            {
+                for (int i = 0; i < ColumnDefinitions.Count; i++)
+                {
+                     if (string.Equals(ColumnDefinitions[i].Name, columnName))
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;        
         }
 
 
-        public override string ToString()
+       public override string ToString()
         {
             //TODO DEADLINE 1.A: Return the table as a string. The format is specified in the documentation
             //Valid examples:
@@ -112,14 +121,53 @@ namespace DbManager
             //"" <- no columns, no rows
             //"['Name']" <- one column, no rows
             
-            return null;
+            string result;
+
+            if(ColumnDefinitions == null || ColumnDefinitions.Count == 0)
+            {
+                result = "";
+                return result;
+            }
             
+            result = "['";
+            for(int i = 0; i < ColumnDefinitions.Count; i++)
+            {
+                result += ColumnDefinitions[i].Name;
+                if(i < ColumnDefinitions.Count - 1)
+                {
+                    result += "','";
+                }
+            }
+            result += "']";
+            
+            if(Rows != null && Rows.Count > 0)
+            {
+                foreach(Row row in Rows)
+                {
+                    result += "{'";
+                    for(int i = 0; i < row.Values.Count; i++)
+                    {
+                        result += row.Values[i];
+                        if(i < row.Values.Count - 1)
+                        {
+                            result += "','";
+                        }
+                    }
+                    result += "'}";
+                }
+            }
+            
+            return result;
         }
 
         public void DeleteIthRow(int row)
         {
             //TODO DEADLINE 1.A: Delete the i-th row. If there is no i-th row, do nothing
-            
+
+            if (row >= 0 && row < Rows.Count)
+            {
+              Rows.RemoveAt(row);
+            }
         }
 
         private List<int> RowIndicesWhereConditionIsTrue(Condition condition)
