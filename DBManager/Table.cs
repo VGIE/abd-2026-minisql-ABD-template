@@ -114,18 +114,28 @@ namespace DbManager
                 result += "{";
                 for (int j = 0; j < row.Values.Count; j++)
                 {
-                    result += "'" + row.Values + "'";
+                    result += "'" + row.Values[j] + "'";
+                    if (j < row.Values.Count - 1)
+                    {
+                        result += ",";
+                    }
                 }
+                result += "}";
+                
             }
 
-            return null;
+            return result;
             
         }
 
         public void DeleteIthRow(int row)
         {
             //TODO DEADLINE 1.A: Delete the i-th row. If there is no i-th row, do nothing
-            
+            if (row < 0 || row >= Rows.Count)
+            {
+                return;
+            }
+            Rows.RemoveAt(row);
         }
 
         private List<int> RowIndicesWhereConditionIsTrue(Condition condition)
