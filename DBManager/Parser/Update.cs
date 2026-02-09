@@ -12,11 +12,15 @@ namespace DbManager
         public Update(string table, List<SetValue> columnNames, Condition where)
         {
             //TODO DEADLINE 2: Initialize member variables
+            Table = table;
+            Columns = columnNames;
+            Where = where;
             
         }
 
         public string Execute(Database database)
         {
+            database.Update(Table,Columns,Where);
             //TODO DEADLINE 3: Run the query and return the appropriate message
             //UpdateSuccess or the last error in the database
             

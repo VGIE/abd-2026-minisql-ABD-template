@@ -117,7 +117,8 @@ namespace DbManager
             
             ret = value.Split(Delimiter);
             List<String> rows = new List<String>();
-            for (int i = 0; i <= ret.Count(); i++) {
+            for (int i = 0; i <= ret.Count(); i++) 
+            {
                 rows[i] = ret[i];
             }
             //hacer el tolist a mano
