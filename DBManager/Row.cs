@@ -18,6 +18,10 @@ namespace DbManager
         {
             //TODO DEADLINE 1.A: Initialize member variables
             ColumnDefinitions = columnDefinitions;
+            foreach (var i in values)
+            {
+                Encode(i);
+            }
             Values = values;
             
         }
@@ -30,7 +34,7 @@ namespace DbManager
             {
                 if (item.Name == columnName)
                 {
-                     Values[i]=value;
+                     Values[i]=Encode(value);
                 }
                 i++;
             }
@@ -44,7 +48,7 @@ namespace DbManager
             foreach (var item in ColumnDefinitions)
             {
                 if (item.Name == columnName) {
-                    return Values[i];
+                    return Decode(Values[i]);
                 }
                 i++;
             }
@@ -98,11 +102,15 @@ namespace DbManager
         public string AsText()
         {
             //TODO DEADLINE 1.C: Return the row as string with all values separated by the delimiter
-            String row="";
+            
             int i = 0;
+            String row = Values[i];
             foreach (var item in Values)
             {
-                row = row + Values[i] +Delimiter;
+                if (i > 0)
+                {
+                    row = row + Delimiter + Encode(Values[i]);
+                }
                 i++;
             }
             return row;
@@ -116,12 +124,12 @@ namespace DbManager
             string[] ret=new string[columns.Count];
             
             ret = value.Split(Delimiter);
+
             List<String> rows = new List<String>();
-            for (int i = 0; i <= ret.Count(); i++) 
+            for (int i = 0; i < ret.Count(); i++) 
             {
-                rows[i] = ret[i];
+                rows.Add(Decode(ret[i]));
             }
-            //hacer el tolist a mano
             return new Row(columns,rows);
             
         }
