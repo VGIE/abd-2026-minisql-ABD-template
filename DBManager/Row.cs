@@ -46,14 +46,15 @@ namespace DbManager
             int i = 0;
             foreach (var item in ColumnDefinitions)
             {
-                if (item.Name == columnName) {
+                if (item.Name == columnName)
+                {
                     return Decode(Values[i]);
                 }
                 i++;
             }
 
             return null;
-            
+
         }
 
         public bool IsTrue(Condition condition)
@@ -64,10 +65,10 @@ namespace DbManager
 
             if (a == null)
                 return false;
-            
+
             ColumnDefinition.DataType type = ColumnDefinition.DataType.String;
-            
-            for(int i=0; i<ColumnDefinitions.Count; i++)
+
+            for (int i = 0; i < ColumnDefinitions.Count; i++)
             {
                 if (ColumnDefinitions[i].Name == nombreCol)
                 {
@@ -79,8 +80,8 @@ namespace DbManager
             //TODO DEADLINE 1.A: Given a condition (column name, operator and literal value, return whether it is true or not
             //for this row. Check Condition.IsTrue method
 
-            return condition.IsTrue(a,type);
-            
+            return condition.IsTrue(a, type);
+
         }
 
         private const string Delimiter = ":";
@@ -89,12 +90,13 @@ namespace DbManager
         private static string Encode(string value)
         {
             //TODO DEADLINE 1.C: Encode the delimiter in value
-            if (value == null) {
+            if (value == null)
+            {
                 return null;
             }
 
-            return value.Replace(Delimiter,DelimiterEncoded);
-            
+            return value.Replace(Delimiter, DelimiterEncoded);
+
         }
 
         private static string Decode(string value)
@@ -120,7 +122,7 @@ namespace DbManager
             string row = "";
             for (int i = 0; i < Values.Count; i++)
             {
-                row += Values[i]; 
+                row += Values[i];
                 if (i < Values.Count - 1)
                 {
                     row += Delimiter;
@@ -134,17 +136,17 @@ namespace DbManager
         {
             //TODO DEADLINE 1.C: Parse a rowReturn the row as string with all values separated by the delimiter
 
-            string[] ret=new string[columns.Count];
-            
+            string[] ret = new string[columns.Count];
+
             ret = value.Split(Delimiter);
 
             List<String> rows = new List<String>();
-            for (int i = 0; i < ret.Length && i < columns.Count; i++) 
+            for (int i = 0; i < ret.Length && i < columns.Count; i++)
             {
                 rows.Add(ret[i]);
             }
-            return new Row(columns,rows);
-            
+            return new Row(columns, rows);
+
         }
     }
 }

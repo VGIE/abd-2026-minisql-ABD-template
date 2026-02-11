@@ -5,11 +5,11 @@ namespace OurTests
     public class TableTests
     {
         //TODO DEADLINE 1A : Create your own tests for Table
-        
+
         [Fact]
         public void Test1()
         {
-        var columns = new List<ColumnDefinition>
+            var columns = new List<ColumnDefinition>
                   {
         new ColumnDefinition(ColumnDefinition.DataType.String, "Nombre"),
         new ColumnDefinition(ColumnDefinition.DataType.Int, "Numero")
@@ -26,6 +26,6 @@ namespace OurTests
         }
 
 
-        }
-        
     }
+
+}

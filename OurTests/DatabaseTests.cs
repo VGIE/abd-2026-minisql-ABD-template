@@ -6,7 +6,7 @@ namespace OurTests
     public class UnitTest1
     {
         //TODO DEADLINE 1B : Create your own tests for Database
-        
+
         [Fact]
         public void testAddTable()
         {
@@ -71,7 +71,7 @@ namespace OurTests
         {
             Database database = Database.CreateTestDatabase();
             bool create = database.CreateTable("new table", new List<ColumnDefinition>
-                  {});
+            { });
 
             Assert.False(create);
             Assert.Equal(Constants.DatabaseCreatedWithoutColumnsError, database.LastErrorMessage);
@@ -146,7 +146,7 @@ namespace OurTests
             Assert.True(delet);
             Assert.Equal(Constants.DeleteSuccess, database.LastErrorMessage);
 
-            for(int i = 0; i < table.NumRows(); i++)
+            for (int i = 0; i < table.NumRows(); i++)
             {
                 Row row = table.GetRow(i);
                 Assert.NotEqual(Table.TestColumn1Row1, row.GetValue(Table.TestColumn1Row1));

@@ -12,23 +12,23 @@ namespace OurTests
         }
         */
         [Fact]
-        public void asTextTest() 
+        public void asTextTest()
         {
-           var columns = new List<ColumnDefinition>
+            var columns = new List<ColumnDefinition>
            {
             new ColumnDefinition(ColumnDefinition.DataType.String, "Nombre"),
             new ColumnDefinition(ColumnDefinition.DataType.Int, "Numero"),
             new ColumnDefinition(ColumnDefinition.DataType.Double, "Decimal")
            };
             List<String> valores = new List<String> { "Noa", "1", "0.5" };
-            Row r=new Row(columns, valores);
+            Row r = new Row(columns, valores);
             string prue = r.AsText();
             string resultado = "Noa:1:0.5";
             Assert.Equal(resultado, prue);
         }
 
         [Fact]
-        public void asTextDelimTest() 
+        public void asTextDelimTest()
         {
             var columns = new List<ColumnDefinition>
            {
@@ -44,7 +44,7 @@ namespace OurTests
         }
 
         [Fact]
-        public void parseTest() 
+        public void parseTest()
         {
             var columns = new List<ColumnDefinition>
            {
@@ -53,17 +53,17 @@ namespace OurTests
             new ColumnDefinition(ColumnDefinition.DataType.Double, "Decimal")
            };
 
-           
+
             List<String> valores = new List<String> { "Noa", "1", "0.5" };
             Row resultado = new Row(columns, valores);
             string values = resultado.AsText();
-            Row prue=Row.Parse(columns,values);
+            Row prue = Row.Parse(columns, values);
 
             Assert.Equal(resultado.Values, prue.Values);
         }
 
         [Fact]
-        public void parseDelimTest() 
+        public void parseDelimTest()
         {
             var columns = new List<ColumnDefinition>
            {
@@ -74,9 +74,9 @@ namespace OurTests
 
 
             List<String> valores = new List<String> { "Noa:", "1", "0.5" };
-            
+
             Row resultado = new Row(columns, valores);
-            string values ="Noa[SEPARATOR]:1:0.5";
+            string values = "Noa[SEPARATOR]:1:0.5";
             Console.WriteLine(values);
             Row prue = Row.Parse(columns, values);
 
@@ -84,7 +84,8 @@ namespace OurTests
         }
 
         [Fact]
-        public void getSetTest() {
+        public void getSetTest()
+        {
             var columns = new List<ColumnDefinition>
            {
             new ColumnDefinition(ColumnDefinition.DataType.String, "Nombre"),
@@ -94,9 +95,9 @@ namespace OurTests
 
 
             List<String> valores = new List<String> { "Noa", "1", "0.5" };
-            Row r=new Row(columns, valores);
+            Row r = new Row(columns, valores);
             string prue = r.GetValue("Nombre");
-            Assert.Equal("Noa",prue);
+            Assert.Equal("Noa", prue);
             r.SetValue("Nombre", "Wiwi");
             prue = r.GetValue("Nombre");
             Assert.Equal("Wiwi", prue);

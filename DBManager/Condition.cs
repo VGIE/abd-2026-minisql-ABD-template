@@ -15,9 +15,9 @@ namespace DbManager
         public Condition(string column, string op, string literalValue)
         {
             //TODO DEADLINE 1A: Initialize member variables
-            ColumnName=column;
-            Operator=op;
-            LiteralValue=literalValue;
+            ColumnName = column;
+            Operator = op;
+            LiteralValue = literalValue;
 
         }
 
@@ -32,14 +32,15 @@ namespace DbManager
             //9 < 10
             //Convert first the strings to the appropriate type and
             //then compare (depending on the operator of the condition)
-            bool esIg=false;
-            bool esMa=false;
+            bool esIg = false;
+            bool esMa = false;
             bool esMe = false;
 
             if (value == null) { value = ""; }
             if (LiteralValue == null) { LiteralValue = ""; }
 
-            switch (type) {
+            switch (type)
+            {
                 case ColumnDefinition.DataType.String:
                     int cmp = string.Compare(value, LiteralValue);
                     esIg = (cmp == 0);
@@ -67,7 +68,7 @@ namespace DbManager
             if (Operator == "<") { return esMe; }
 
             return false;
-            
+
         }
     }
 }
