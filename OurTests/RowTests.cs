@@ -77,7 +77,6 @@ namespace OurTests
 
             Row resultado = new Row(columns, valores);
             string values = "Noa[SEPARATOR]:1:0.5";
-            Console.WriteLine(values);
             Row prue = Row.Parse(columns, values);
 
             Assert.Equal(resultado.Values, prue.Values);
