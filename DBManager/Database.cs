@@ -84,6 +84,7 @@ namespace DbManager
             else
             {
                 Table newTable = new Table(tableName, ColumnDefinition);
+                Tables.Add(newTable);
                 LastErrorMessage = Constants.CreateTableSuccess;
                 return true;
             }
@@ -123,6 +124,14 @@ namespace DbManager
                 LastErrorMessage = Constants.TableDoesNotExistError;
                 return false;
             }
+
+
+            if (values == null || values.Count != TableByName(tableName).NumColumns())
+            {
+                LastErrorMessage = Constants.ColumnCountsDontMatch;
+                return false;
+            }
+
 
             TableByName(tableName).Insert(values);
             LastErrorMessage = Constants.InsertSuccess;
