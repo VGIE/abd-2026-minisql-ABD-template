@@ -34,7 +34,10 @@ namespace DbManager
                 user.Username= Username;
                 user.EncryptedPassword=Password;
 
-               //database.SecurityManager.AddUser(user);
+                profile.Users.Add(user);
+
+                database.SecurityManager.AddProfile(profile);
+
             }
              if(database.LastErrorMessage!=null)
             {
