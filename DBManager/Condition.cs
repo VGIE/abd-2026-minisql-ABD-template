@@ -55,15 +55,14 @@ namespace DbManager
                     if (vInt < literalInt) { esMe = true; }
                     break;
                 case ColumnDefinition.DataType.Double:
-                    string vLimpio = value.Replace(".", ",");
-                    string lLimpio = LiteralValue.Replace(".", ",");
 
-                    double vDouble = double.Parse(vLimpio);
-                    double literalDouble = double.Parse(lLimpio);
+                    double vDouble = double.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+                    double literalDouble = double.Parse(LiteralValue, System.Globalization.CultureInfo.InvariantCulture);
 
-                    if (vDouble == literalDouble) { esIg = true; }
-                    if (vDouble > literalDouble) { esMa = true; }
-                    if (vDouble < literalDouble) { esMe = true; }
+                    double dif = vDouble - literalDouble;
+                    esIg = ((dif < 0.0000000000000001) && (-dif < 0.0000000000000001));
+                    esMa = (dif > 0.0000000000000001);
+                    esMe = (dif < 0.0000000000000001);
                     break;
             }
             if (Operator == "=") { return esIg; }

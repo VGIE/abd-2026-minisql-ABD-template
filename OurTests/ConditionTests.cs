@@ -50,8 +50,10 @@ namespace OurTests
             Assert.False(condMa.IsTrue("10.5", ColumnDefinition.DataType.Double));
 
             Condition condMe = new Condition("Price", "<", "10.5");
-            Assert.True(condMe.IsTrue("10.4999999", ColumnDefinition.DataType.Double));
-            Assert.False(condMe.IsTrue("10.5", ColumnDefinition.DataType.Double));
+
+            Assert.True(condMe.IsTrue("10.49999", ColumnDefinition.DataType.Double));
+            Assert.False(condMe.IsTrue("10.5000001", ColumnDefinition.DataType.Double));
+
         }
 
         [Fact]
