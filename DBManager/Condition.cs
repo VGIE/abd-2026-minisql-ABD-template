@@ -65,9 +65,12 @@ namespace DbManager
                     esMe = (dif < 0.0000000000000001);
                     break;
             }
-            if (Operator == "=") { return esIg; }
-            if (Operator == ">") { return esMa; }
-            if (Operator == "<") { return esMe; }
+            string ig = "=";
+            string ma= ">";
+            string me= "<";
+            if (Operator == ig) { return esIg; }
+            if (Operator == ma) { return esMa; }
+            if (Operator == me) { return esMe; }
 
             return false;
 
