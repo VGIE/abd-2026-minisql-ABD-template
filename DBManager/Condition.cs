@@ -68,29 +68,88 @@ namespace DbManager
                     }
                     return false;
                 
-
                 case ColumnDefinition.DataType.Int:
-                
-                
-                // if(intValue > type)
-                 
-                return true;
-                 
-                 
+
+                if (int.TryParse(value, out int intValue) && 
+                        int.TryParse(LiteralValue, out int intLiteral))
+                    {
+                        if (Operator == "<")
+                        {
+                            if (intValue < intLiteral)
+                                return true;
+                        }
+                        else if (Operator == ">")
+                        {
+                            if (intValue > intLiteral)
+                                return true;
+                        }
+                        else if (Operator == "<=")
+                        {
+                            if (intValue <= intLiteral)
+                                return true;
+                        }
+                        else if (Operator == ">=")
+                        {
+                            if (intValue >= intLiteral)
+                                return true;
+                        }
+                        else if (Operator == "=")
+                        {
+                            if (intValue == intLiteral)
+                                return true;
+                        }
+                        else if (Operator == "!=")
+                        {
+                            if (intValue != intLiteral)
+                                return true;
+                        }
+                    }
+                    return false;
 
                 case ColumnDefinition.DataType.Double:
-                
-                
-                
-                return true;
-            
+                    if (double.TryParse(value, CultureInfo.InvariantCulture, out double doubleValue) && 
+                        double.TryParse(LiteralValue, CultureInfo.InvariantCulture, out double doubleLiteral))
+                    {
+                        if (Operator == "<")
+                        {
+                            if (doubleValue < doubleLiteral)
+                                return true;
+                        }
+                        else if (Operator == ">")
+                        {
+                            if (doubleValue > doubleLiteral)
+                                return true;
+                        }
+                        else if (Operator == "<=")
+                        {
+                            if (doubleValue <= doubleLiteral)
+                                return true;
+                        }
+                        else if (Operator == ">=")
+                        {
+                            if (doubleValue >= doubleLiteral)
+                                return true;
+                        }
+                        else if (Operator == "=")
+                        {
+                            if (doubleValue == doubleLiteral)
+                                return true;
+                        }
+                        else if (Operator == "!=")
+                        {
+                            if (doubleValue != doubleLiteral)
+                                return true;
+                        }
+                    }
+                    return false;
+
+            }
 
             
             
-            
-            }
     
                 return false;
         }
     }
-    }
+    
+}
