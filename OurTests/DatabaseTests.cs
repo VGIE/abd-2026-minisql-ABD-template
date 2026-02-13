@@ -218,5 +218,23 @@ namespace OurTests
                 }
             }
         }
+
+        [Fact]
+        public void testSaveAndLoad()
+        {
+            Database database = Database.CreateTestDatabase();
+
+            bool save = database.Save(Table.TestTableName);
+            Assert.True(save);
+
+            Database load = Database.Load(Table.TestTableName, Database.AdminUsername, Database.AdminPassword);
+            Assert.NotNull(load);
+
+            Table table = load.TableByName(Table.TestTableName);
+            Assert.NotNull(table);
+
+            Assert.Equal(3, table.NumColumns());
+            Assert.Equal(3, table.NumRows());
+        }
     }
 }

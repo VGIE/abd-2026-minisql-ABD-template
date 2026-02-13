@@ -85,6 +85,7 @@ namespace DbManager
             else
             {
                 Table newTable = new Table(tableName, ColumnDefinition);
+                Tables.Add(newTable);
                 LastErrorMessage = Constants.CreateTableSuccess;
                 return true;
             }
@@ -122,6 +123,11 @@ namespace DbManager
             if (TableByName(tableName) == null)
             {
                 LastErrorMessage = Constants.TableDoesNotExistError;
+                return false;
+            }
+            if (values == null || values.Count != TableByName(tableName).NumColumns())
+            {
+                LastErrorMessage = Constants.ColumnCountsDontMatch;
                 return false;
             }
 
@@ -322,7 +328,7 @@ namespace DbManager
                     }
 
                 }
-
+                /* descomentar solo para DEADLINE 5
                 Manager manager= Manager.Load(databaseName, username);
 
                 if(manager==null)
@@ -334,9 +340,9 @@ namespace DbManager
                 {
                     return null;
                 }
-
+                
                 db.SecurityManager=manager;
-
+                */
                 return db;
 
 
