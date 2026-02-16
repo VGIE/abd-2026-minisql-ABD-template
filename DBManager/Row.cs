@@ -16,8 +16,9 @@ namespace DbManager
         public Row(List<ColumnDefinition> columnDefinitions, List<string> values)
         {
             //TODO DEADLINE 1.A: Initialize member variables
+            this.ColumnDefinitions = columnDefinitions;
+            this.Values = values;
 
-            
         }
 
         public void SetValue(string columnName, string value)

@@ -42,9 +42,12 @@ namespace DbManager
         public ColumnDefinition GetColumn(int i)
         {
             //TODO DEADLINE 1.A: Return the i-th column
-            
+            if (i >= 0 && i < this.ColumnDefinitions.Count)
+            {
+                return this.ColumnDefinitions[i];
+            }
             return null;
-            
+
         }
 
         public int NumColumns()
