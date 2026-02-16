@@ -1,3 +1,5 @@
+using DbManager;
+
 namespace OurTests
 {
     public class RowTests
@@ -31,6 +33,9 @@ namespace OurTests
 
             Assert.Null(testRow.GetValue("Nombre"));
         }
+
+  
+
 
     }
 }

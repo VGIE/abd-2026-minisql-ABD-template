@@ -24,7 +24,7 @@ namespace DbManager
         public void SetValue(string columnName, string value)
         {
             //TODO DEADLINE 1.A: Given a column name and value, change the value in that column
-            var column = this.ColumnDefinitions.FirstOrDefault(col => col.Name == columnName)
+            var column = this.ColumnDefinitions.FirstOrDefault(col => col.Name == columnName);
             if (column != null)
             {
                 int index = this.ColumnDefinitions.IndexOf(column);
@@ -40,8 +40,8 @@ namespace DbManager
             var column = this.ColumnDefinitions.FirstOrDefault(col => col.Name == columnName);
             if (column != null)
             {
-                int index = this.ColumnDefinitions.IndexOf(column)
-                    return(Values(index))
+                int index = this.ColumnDefinitions.IndexOf(column);
+                    return (Values[index]);
             }
 
 
@@ -55,9 +55,14 @@ namespace DbManager
             //for this row. Check Condition.IsTrue method
             var colName = condition.ColumnName;
             var valueColumn = GetValue(colName);
-            bool result = condition.IsTrue(valueColumn);
+            var columnDef = this.ColumnDefinitions.FirstOrDefault(col => col.Name == colName);
+            if (columnDef != null)
+            {
+                return condition.IsTrue(valueColumn, columnDef.Type);
+            }
+           
             
-            return result;
+            return false;
             
         }
 
