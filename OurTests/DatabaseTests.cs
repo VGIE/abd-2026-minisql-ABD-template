@@ -236,5 +236,61 @@ namespace OurTests
             Assert.Equal(3, table.NumColumns());
             Assert.Equal(3, table.NumRows());
         }
+        [Fact]      
+        public void testSaveReturnTrueAndCreateFile()
+        {
+            Database db= Database.CreateTestDatabase();
+
+            string fileName= "testDB.bin";
+            bool result= db.Save(fileName);
+
+            Assert.True(result);
+            Assert.True(File.Exists(fileName));
+
+            File.Delete(fileName);
+
+        }
+
+        [Fact]
+        public void testSaveLoadPreserveData()
+        {
+            Database db= Database.CreateTestDatabase();
+
+            db.CreateTable("People", new List<ColumnDefinition>
+            {
+                new ColumnDefinition(ColumnDefinition.DataType.String,"Name"),
+                new ColumnDefinition(ColumnDefinition.DataType.Int, "Age")
+            });
+
+            db.Insert("People", new List<string>{"Lucia", "20"});
+            db.Insert("People", new List<string>{"Wiame", "23"});
+            db.Insert("People", new List<string>{"Araitz", "20"});
+
+            string fileName="testDB.bin";
+
+            bool saveResult= db.Save(fileName); 
+
+            Database loadedDB= Database.Load(fileName, Database.AdminUsername, Database.AdminPassword);
+            Assert.True(saveResult, "Should return true");
+            Assert.NotNull(loadedDB);
+
+            Table loadedTable= loadedDB.TableByName("People");
+            Assert.NotNull(loadedTable);
+
+            Assert.Equal(2, loadedTable.NumColumns());
+            Assert.Equal(3, loadedTable.NumRows());
+
+            Assert.Equal("Lucia", loadedTable.GetRow(0).GetValue("Name"));
+            Assert.Equal("Wiame", loadedTable.GetRow(1).GetValue("Name"));
+            Assert.Equal("Araitz", loadedTable.GetRow(2).GetValue("Name"));
+
+            Assert.Equal("20", loadedTable.GetRow(0).GetValue("Age"));
+            Assert.Equal("23", loadedTable.GetRow(1).GetValue("Age"));
+            Assert.Equal("20", loadedTable.GetRow(2).GetValue("Age"));
+
+            File.Delete(fileName);
+        }
+
+
     }
 }
