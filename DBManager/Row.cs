@@ -39,7 +39,7 @@ namespace DbManager
 
                 if (ColumnDefinitions[i].Name == columnName)
                 {
-                    
+
                     Values[i] = Encode(value);
                 }
             }
@@ -69,8 +69,8 @@ namespace DbManager
             string nombreCol = condition.ColumnName;
             string a = GetValue(nombreCol);
 
-            if (a == null)
-                return false;
+            if (a == null) { return false; }
+
 
             ColumnDefinition.DataType type = ColumnDefinition.DataType.String;
 

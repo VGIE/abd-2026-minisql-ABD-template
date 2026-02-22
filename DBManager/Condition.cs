@@ -69,8 +69,10 @@ namespace DbManager
             string ma= ">";
             string me= "<";
             if (Operator == ig) { return esIg; }
-            if (Operator == ma) { return esMa; }
-            if (Operator == me) { return esMe; }
+            if (!esIg) {
+                if (Operator == ma) { return esMa; }
+                if (Operator == me) { return esMe; }
+            }
 
             return false;
 

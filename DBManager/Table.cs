@@ -74,7 +74,7 @@ namespace DbManager
         public int NumColumns()
         {
             //TODO DEADLINE 1.A: Return the number of columns
-
+            
             return ColumnDefinitions.Count;
 
         }
@@ -215,7 +215,8 @@ namespace DbManager
             //TODO DEADLINE 1.A: Return a new table (with name 'Result') that contains the result of the select. The condition
             //may be null (if no condition, all rows should be returned). This is the most difficult method in this class
             List<ColumnDefinition> newC = new List<ColumnDefinition>();
-            
+            Table Result = new Table(null, null);
+            if (columnNames is null) { return null;}
             foreach (string name in columnNames)
             {
                 ColumnDefinition col = ColumnByName(name);
@@ -225,7 +226,8 @@ namespace DbManager
                     newC.Add(col);
                 }
             }
-            Table Result = new Table("Result", newC);
+            
+            Result = new Table("Result", newC);
 
             for (int i = 0; i < Rows.Count; i++)
             {
@@ -241,7 +243,7 @@ namespace DbManager
                         newValues.Add(Rows[i].Values[originalI]);
 
                     }
-                    
+
                     Row newRow = new Row(newC, newValues);
                     Result.AddRow(newRow);
 

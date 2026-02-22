@@ -35,6 +35,7 @@ namespace OurTests
          };
 
             Table table = new Table("Personas", columns);
+            
             table.Insert(new List<string> { "Ana", "3" });
             table.Insert(new List<string> { "Marcos", "5" });
             List<string> selectC = new List<string>();
@@ -43,6 +44,11 @@ namespace OurTests
 
             Assert.Equal("Ana", result.GetRow(0).Values[0]);
             Assert.Equal("Marcos", result.GetRow(1).Values[0]);
+            // select sobre una tabla nombre inexistente
+            Table t = new Table("Persona", null);
+            Table result2=t.Select(null, null);
+            Assert.Null(result2);
+
         }
         [Fact]
         public void TableSelectWithConditionTest()
@@ -108,7 +114,7 @@ namespace OurTests
 
             Assert.Equal("Peine", result.GetRow(0).Values[0]);
 
-            Condition condici2 = new Condition("Precio", ">", "1");
+            Condition condici2 = new Condition("Precio", ">", "3.4999999999");
             result = table.Select(selectC, condici2);
 
             Assert.Equal(1, result.NumColumns());
@@ -117,7 +123,7 @@ namespace OurTests
             Assert.Equal("Jabon", result.GetRow(0).Values[0]);
             Assert.Equal("Peine", result.GetRow(1).Values[0]);
 
-            Condition condici3 = new Condition("Precio", "<", "1.0");
+            Condition condici3 = new Condition("Precio", "<", "3.5");
              result = table.Select(selectC, condici3);
 
             Assert.Equal(1, result.NumColumns());

@@ -27,6 +27,12 @@ namespace OurTests
             Assert.Equal(resultado, prue);
         }
 
+
+        [Fact] public void isTrueTest() 
+        { 
+            
+        }
+
         [Fact]
         public void asTextDelimTest()
         {
