@@ -190,6 +190,10 @@ namespace OurTests
                 Table.TestColumn2Name, Table.TestColumn3Name, Table.TestColumn1Name
             }, null);
 
+            Assert.Equal(Table.TestColumn2Name, select.GetColumn(0).Name);
+            Assert.Equal(Table.TestColumn3Name, select.GetColumn(1).Name);
+            Assert.Equal(Table.TestColumn1Name, select.GetColumn(2).Name);
+
             Assert.Equal(Table.TestColumn2Row1, select.GetRow(0).Values[0]);
             Assert.Equal(Table.TestColumn3Row1, select.GetRow(0).Values[1]);
             Assert.Equal(Table.TestColumn1Row1, select.GetRow(0).Values[2]);
