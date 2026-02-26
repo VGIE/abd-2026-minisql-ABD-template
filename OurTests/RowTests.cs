@@ -28,9 +28,10 @@ namespace OurTests
         }
 
 
-        [Fact] public void isTrueTest() 
-        { 
-            
+        [Fact]
+        public void isTrueTest()
+        {
+
         }
 
         [Fact]

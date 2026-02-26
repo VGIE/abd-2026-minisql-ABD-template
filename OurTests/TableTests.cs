@@ -35,7 +35,7 @@ namespace OurTests
          };
 
             Table table = new Table("Personas", columns);
-            
+
             table.Insert(new List<string> { "Ana", "3" });
             table.Insert(new List<string> { "Marcos", "5" });
             List<string> selectC = new List<string>();
@@ -46,7 +46,7 @@ namespace OurTests
             Assert.Equal("Marcos", result.GetRow(1).Values[0]);
             // select sobre una tabla nombre inexistente
             Table t = new Table("Persona", null);
-            Table result2=t.Select(null, null);
+            Table result2 = t.Select(null, null);
             Assert.Null(result2);
 
         }
@@ -124,15 +124,15 @@ namespace OurTests
             Assert.Equal("Peine", result.GetRow(1).Values[0]);
 
             Condition condici3 = new Condition("Precio", "<", "3.5");
-             result = table.Select(selectC, condici3);
+            result = table.Select(selectC, condici3);
 
             Assert.Equal(1, result.NumColumns());
             Assert.Equal(0, result.NumRows());
 
         }
 
-       [Fact]
-         public void deleteTest()
+        [Fact]
+        public void deleteTest()
         {
             var columns = new List<ColumnDefinition>
                   {
@@ -142,10 +142,10 @@ namespace OurTests
          };
 
             Table table = new Table("Personas", columns);
-            
-            table.Insert(new List<string> { "Jorge" , "1" , "1.74" });
-            table.Insert(new List<string> { "Irene" , "7" , "1.60" });
-            table.Insert(new List<string> { "Ander" , "8" , "1.67" });
+
+            table.Insert(new List<string> { "Jorge", "1", "1.74" });
+            table.Insert(new List<string> { "Irene", "7", "1.60" });
+            table.Insert(new List<string> { "Ander", "8", "1.67" });
 
             Condition condicion = new Condition("Nombre", "=", "Jorge");
             Condition condici2 = new Condition("Altura", "<", "1.75");
@@ -160,7 +160,7 @@ namespace OurTests
         }
 
         [Fact]
-        public void RowSetAndGetValueWithNotEnoughValues() 
+        public void RowSetAndGetValueWithNotEnoughValues()
         {
             var columns = new List<ColumnDefinition>
                   {
@@ -173,11 +173,11 @@ namespace OurTests
 
             Assert.False(table.Insert(new List<string> { "Jorge", "1" }));
 
-            Assert.False(table.Insert(new List<string> {}));
+            Assert.False(table.Insert(new List<string> { }));
 
             Row row = new Row(columns, new List<string>() { });
-            row.SetValue("Nombre","Juan");
-            Assert.Equal("Juan",row.GetValue("Nombre"));
+            row.SetValue("Nombre", "Juan");
+            Assert.Equal("Juan", row.GetValue("Nombre"));
         }
 
         [Fact]
