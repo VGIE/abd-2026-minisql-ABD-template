@@ -30,6 +30,9 @@ namespace DbManager
 
             if(profile==null)
             {
+               return "SecurityProfileDoesNotExistError";
+            }
+
                 User user= new User();
                 user.Username= Username;
                 user.EncryptedPassword=Password;
@@ -37,8 +40,7 @@ namespace DbManager
                 profile.Users.Add(user);
 
                 database.SecurityManager.AddProfile(profile);
-
-            }
+                
              if(database.LastErrorMessage!=null)
             {
                 return database.LastErrorMessage;
