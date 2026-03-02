@@ -236,13 +236,13 @@ namespace OurTests
             Assert.Equal(3, table.NumColumns());
             Assert.Equal(3, table.NumRows());
         }
-        [Fact]      
+        [Fact]
         public void testSaveReturnTrueAndCreateFile()
         {
-            Database db= Database.CreateTestDatabase();
+            Database db = Database.CreateTestDatabase();
 
-            string fileName= "testDB.bin";
-            bool result= db.Save(fileName);
+            string fileName = "testDB.bin";
+            bool result = db.Save(fileName);
 
             Assert.True(result);
             Assert.True(File.Exists(fileName));
@@ -254,7 +254,7 @@ namespace OurTests
         [Fact]
         public void testSaveLoadPreserveData()
         {
-            Database db= Database.CreateTestDatabase();
+            Database db = Database.CreateTestDatabase();
 
             db.CreateTable("People", new List<ColumnDefinition>
             {
@@ -262,19 +262,19 @@ namespace OurTests
                 new ColumnDefinition(ColumnDefinition.DataType.Int, "Age")
             });
 
-            db.Insert("People", new List<string>{"Lucia", "20"});
-            db.Insert("People", new List<string>{"Wiame", "23"});
-            db.Insert("People", new List<string>{"Araitz", "20"});
+            db.Insert("People", new List<string> { "Lucia", "20" });
+            db.Insert("People", new List<string> { "Wiame", "23" });
+            db.Insert("People", new List<string> { "Araitz", "20" });
 
-            string fileName="testDB.bin";
+            string fileName = "testDB.bin";
 
-            bool saveResult= db.Save(fileName); 
+            bool saveResult = db.Save(fileName);
 
-            Database loadedDB= Database.Load(fileName, Database.AdminUsername, Database.AdminPassword);
+            Database loadedDB = Database.Load(fileName, Database.AdminUsername, Database.AdminPassword);
             Assert.True(saveResult, "Should return true");
             Assert.NotNull(loadedDB);
 
-            Table loadedTable= loadedDB.TableByName("People");
+            Table loadedTable = loadedDB.TableByName("People");
             Assert.NotNull(loadedTable);
 
             Assert.Equal(2, loadedTable.NumColumns());

@@ -221,7 +221,7 @@ namespace DbManager
 
             foreach (string name in columnNames)
             {
-                if (ColumnByName(name)==null) { return null; }
+                if (ColumnByName(name) == null) { return null; }
 
                 ColumnDefinition col = ColumnByName(name);
 

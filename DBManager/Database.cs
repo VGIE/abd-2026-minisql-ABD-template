@@ -277,48 +277,48 @@ namespace DbManager
 
             try
             {
-            
-                Database db= new Database();
+
+                Database db = new Database();
                 using (FileStream fs = new FileStream(databaseName, FileMode.Open))
                 using (BinaryReader reader = new BinaryReader(fs))
                 {
 
-                    db.m_username= reader.ReadString();
+                    db.m_username = reader.ReadString();
 
-                    int numTables= reader.ReadInt32();
+                    int numTables = reader.ReadInt32();
 
-                    for(int i=0; i<numTables; i++)
+                    for (int i = 0; i < numTables; i++)
                     {
-                        string tableName= reader.ReadString();
+                        string tableName = reader.ReadString();
 
-                        int columnCount= reader.ReadInt32();
+                        int columnCount = reader.ReadInt32();
 
-                        List<ColumnDefinition> columns= new List<ColumnDefinition>();
+                        List<ColumnDefinition> columns = new List<ColumnDefinition>();
 
-                        for (int c=0; c<columnCount; c++)
+                        for (int c = 0; c < columnCount; c++)
                         {
 
-                        string columnName= reader.ReadString();
-                        string columnTypeString= reader.ReadString(); 
+                            string columnName = reader.ReadString();
+                            string columnTypeString = reader.ReadString();
 
-                        ColumnDefinition.DataType type= (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), columnTypeString);
-                        columns.Add(new ColumnDefinition(type, columnName));
-                    }
+                            ColumnDefinition.DataType type = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), columnTypeString);
+                            columns.Add(new ColumnDefinition(type, columnName));
+                        }
 
-                    Table table= new Table(tableName, columns);
+                        Table table = new Table(tableName, columns);
 
-                    int rowCount= reader.ReadInt32();
+                        int rowCount = reader.ReadInt32();
 
-                    for(int r=0; r<rowCount; r++)
+                        for (int r = 0; r < rowCount; r++)
                         {
-                            int valueCount= reader.ReadInt32();
+                            int valueCount = reader.ReadInt32();
 
-                            List<string> values= new List<string>();
+                            List<string> values = new List<string>();
 
-                            for(int v=0; v<valueCount; v++)
+                            for (int v = 0; v < valueCount; v++)
                             {
                                 values.Add(reader.ReadString());
-                                
+
                             }
                             table.Insert(values);
                         }
@@ -351,7 +351,7 @@ namespace DbManager
             {
                 return null;
             }
-           
+
         }
 
         public string ExecuteMiniSQLQuery(string query)
