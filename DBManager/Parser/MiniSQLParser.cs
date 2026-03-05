@@ -11,7 +11,7 @@ namespace DbManager
         {
             //TODO DEADLINE 2
             //SELECT columnas FROM tabla patrón
-            const string selectPattern =@"^SELECT\s+([a-zA-Z0-9,\s\*]+)\s+FROM\s+([a-zA-Z0-9]+)$" ;
+            const string selectPattern = @"^SELECT\s+([a-zA-Z0-9\*\s,]+)\s+FROM\s+([a-zA-Z0-9]+)$";
            
            //INSERT INTO tabla VALUES columnas patrón
             const string insertPattern = @"^INSERT\s+INTO\s+([a-zA-Z0-9]+)\s+VALUES\s+\(([a-zA-Z0-9, ]+)\)$";
@@ -247,7 +247,7 @@ namespace DbManager
             List<string> commaSeparator = new List<string>();
             for(int i=0; i < textParts.Length; i++)
             {
-                commaSeparator.Add(textParts[i]);
+                commaSeparator.Add(textParts[i].Trim());
             }
             return commaSeparator;
         }
