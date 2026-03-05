@@ -47,14 +47,146 @@ namespace DbManager
             //For example, if the query is a "SELECT ...", there should be a match with selectPattern. We would create and return an instance of Select
             //initialized with the table name, the columns, and (possibly) an instance of Condition.
             //If there is no match, it means there is a syntax error. We will return null.
-            
+
+           Match matchSelect= Regex.Match(miniSQLQuery, selectPattern);
+
+           if (matchSelect.Success)
+           {
+               //Los group corresponden al grupo de paréntesis de la expresión regular de arriba
+               return new Select(matchSelect.Groups[2].Value, CommaSeparatedNames(matchSelect.Groups[1].Value)); 
+           }
+
+           Match matchInsert= Regex.Match(miniSQLQuery, insertPattern);
+
+           if (matchInsert.Success)
+           {
+               return new Insert(matchInsert.Groups[1].Value, CommaSeparatedNames(matchInsert.Groups[2].Value));
+           }
+          
+           Match matchCreateTable= Regex.Match(miniSQLQuery, createTablePattern);
+
+           if (matchCreateTable.Success)
+           {
+               string tableName= matchCreateTable.Groups[1].Value;
+               List<string> stringColumns= CommaSeparatedNames(matchCreateTable.Groups[2].Value);
+
+               List<ColumnDefinition> columnDefinitions= new List<ColumnDefinition>();
+
+               foreach(string s in stringColumns)
+               {
+                   //El trim es para evitar los errores si hay espacios extra al haber escrito las columnas en el query
+                   //Split separa cada columna para quedarse con una cada vez
+                   string[] parts= s.Trim().Split(' ');
+
+                   //El >=2 es para que al menos esté un tipo y su columna
+                   if (parts.Length>=2)
+                   {
+                       //Aquí usa parse para convertir el texto en el valor real del tipo que sea. True hace que INT e int sean válidos igual
+                       ColumnDefinition.DataType type= (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), parts[1], true);
+                       columnDefinitions.Add(new ColumnDefinition(type, parts[0]));
+                   }
+                  
+               }
+               return  new CreateTable(tableName, columnDefinitions);
+           }
+
+            Match matchDrop= Regex.Match(miniSQLQuery, dropTablePattern);
+
+           if (matchDrop.Success)
+           {
+               //Los group corresponden al grupo de paréntesis de la expresión regular de arriba
+               return new DropTable(matchDrop.Groups[1].Value);  
+           }
+
+            Match matchUpdate= Regex.Match(miniSQLQuery, updateTablePattern);
+
+           if (matchUpdate.Success)
+           {
+               //Los group corresponden al grupo de paréntesis de la expresión regular de arriba
+               string tableName= matchUpdate.Groups[1].Value; 
+               string value= matchUpdate.Groups[2].Value;
+               string condicionTxt= matchUpdate.Groups[3].Value;
+
+               List<SetValue> setValues = new List<SetValue>();
+
+               string[] partes= value.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+               foreach(string part in partes)
+                {
+                    string[] v= part.Split('=', StringSplitOptions.RemoveEmptyEntries);
+                    if(v.Length>=2)
+                    {
+                       setValues.Add(new SetValue(v[0].Trim(), v[1].Trim()));
+                    }
+                }
+                 char[] opreadores= new char[]{'=', '>', '<'} ;
+                 string[] parts=  condicionTxt.Split(opreadores, StringSplitOptions.RemoveEmptyEntries);
+
+               if (partes.Length>=2)
+                   {
+                      string column= parts[0].Trim();
+                      string value1= parts[1].Trim();
+                    
+                      //Por defecto, que normalmente suele ser un =
+                      string operadorElegido= "=";
+                    
+                    if (condicionTxt.Contains(">"))
+                    {
+                        operadorElegido= ">";
+                        
+                    }
+                    else if (condicionTxt.Contains("<"))
+                    {
+                        operadorElegido="<";
+                    }
+                    
+                    Condition condicion= new Condition(column, operadorElegido, value1);
+                    return new Update(tableName, setValues, condicion);
+                      
+                   }
+           }
+
+            Match matchDelete= Regex.Match(miniSQLQuery, deletePattern);
+
+           if (matchDelete.Success)
+           {
+
+            string tableName= matchDelete.Groups[1].Value;
+            string condicionTxt= matchDelete.Groups[2].Value;
+
+            char[] operadores= new char[]{'=', '>', '<'} ;
+            string[] partes=  condicionTxt.Split(operadores, StringSplitOptions.RemoveEmptyEntries);
+
+             if (partes.Length>=2)
+                   {
+                      string column= partes[0].Trim();
+                      string value= partes[1].Trim();
+                    
+                      //Por defecto, que normalmente suele ser un =
+                      string operadorElegido= "=";
+                    
+                    if (condicionTxt.Contains(">"))
+                    {
+                        operadorElegido= ">";
+                        
+                    }
+                    else if (condicionTxt.Contains("<"))
+                    {
+                        operadorElegido="<";
+                    }
+                    
+                    Condition condicion= new Condition(column, operadorElegido, value);
+                    return new Delete(tableName, condicion);
+                      
+                   }
+           }
+
 
             //TODO DEADLINE 4
             //Do the same for the security queries (CREATE SECURITY PROFILE, ...)
-            
             return null;
-           
-        }
+
+    }
 
         static List<string> CommaSeparatedNames(string text)
         {
