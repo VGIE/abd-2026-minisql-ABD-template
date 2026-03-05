@@ -217,7 +217,6 @@ namespace DbManager
             //may be null (if no condition, all rows should be returned). This is the most difficult method in this class
             List<ColumnDefinition> newC = new List<ColumnDefinition>();
             List<ColumnDefinition> error = new List<ColumnDefinition>();
-            error.Add(new ColumnDefinition(ColumnDefinition.DataType.String,""));
             Table Result = new Table(null, null);
             if (columnNames is null) { return new Table("", error); }
 

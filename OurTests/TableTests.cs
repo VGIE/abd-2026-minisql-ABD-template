@@ -44,17 +44,25 @@ namespace OurTests
 
             Assert.Equal("Ana", result.GetRow(0).Values[0]);
             Assert.Equal("Marcos", result.GetRow(1).Values[0]);
-            
+
+            //select una columna sin nombre
+
+            List<string> select2 = new List<string>();
+            selectC.Add("Apellido");
+            Table result4 = table.Select(selectC, null);
+            Assert.Equal(0, result4.NumColumns());
+            Assert.Equal(0, result4.NumRows());
+
             // select sobre una tabla nombre inexistente
 
             Table t = new Table("Persona", null);
 
             Table result2 = t.Select(null, null);
-            Assert.Equal(1, result2.NumColumns());
+            Assert.Equal(0, result2.NumColumns());
             Assert.Equal(0, result2.NumRows());
 
             Table result3 = t.Select(selectC, null);
-            Assert.Equal(1, result3.NumColumns());
+            Assert.Equal(0, result3.NumColumns());
             Assert.Equal(0, result3.NumRows());
 
         }
