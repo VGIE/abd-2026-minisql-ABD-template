@@ -11,7 +11,7 @@ namespace DbManager
         {
             //TODO DEADLINE 2
             //SELECT columnas FROM tabla patrón
-            const string selectPattern = @"^SELECT\s+([a-zA-Z0-9\*\s,]+)\s+FROM\s+([a-zA-Z0-9]+)$";
+            const string selectPattern = @"^SELECT\s+([a-zA-Z0-9\*,]+)\s+FROM\s+([a-zA-Z0-9]+)$";
            
            //INSERT INTO tabla VALUES columnas patrón
             const string insertPattern = @"^INSERT\s+INTO\s+([a-zA-Z0-9]+)\s+VALUES\s+\(([a-zA-Z0-9, ]+)\)$";
@@ -25,7 +25,8 @@ namespace DbManager
             
             const string updateTablePattern = @"^UPDATE\s+([a-zA-Z0-9]+)\s+SET\s+([a-zA-Z0-9\s\=\,]+)\s+WHERE\s+(.+)$";
 
-            const string deletePattern = @"^DELETE\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+(.+)$";
+            //punto para los int/double y comilla para los string 'x' 
+            const string deletePattern = @"^DELETE\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+([a-zA-Z0-9]+)\s*([<>=])\s*([a-zA-Z0-9\.\']+)$";
 
             //TODO DEADLINE 4
             const string createSecurityProfilePattern = @"^CREATE\s+SECURITY\s+PROFILE\s+([a-zA-Z0-9]+)$";
@@ -150,36 +151,17 @@ namespace DbManager
 
            if (matchDelete.Success)
            {
-
+            //Mejor simplificar en cuatro grupos los operandos para no tener que hacer los if de =<>
             string tableName= matchDelete.Groups[1].Value;
-            string condicionTxt= matchDelete.Groups[2].Value;
-
-            char[] operadores= new char[]{'=', '>', '<'} ;
-            string[] partes=  condicionTxt.Split(operadores, StringSplitOptions.RemoveEmptyEntries);
-
-             if (partes.Length>=2)
-                   {
-                      string column= partes[0].Trim();
-                      string value= partes[1].Trim();
+            string column= matchDelete.Groups[2].Value;
+            string operador= matchDelete.Groups[3].Value;
+            string valor= matchDelete.Groups[4].Value;
                     
-                      //Por defecto, que normalmente suele ser un =
-                      string operadorElegido= "=";
-                    
-                    if (condicionTxt.Contains(">"))
-                    {
-                        operadorElegido= ">";
-                        
-                    }
-                    else if (condicionTxt.Contains("<"))
-                    {
-                        operadorElegido="<";
-                    }
-                    
-                    Condition condicion= new Condition(column, operadorElegido, value);
+                    Condition condicion= new Condition(column, operador, valor);
                     return new Delete(tableName, condicion);
                       
-                   }
-           }
+         }
+           
 
 
             //TODO DEADLINE 4
@@ -228,16 +210,16 @@ namespace DbManager
               return new AddUser(matchAddUser.Groups[1].Value, matchAddUser.Groups[2].Value, matchAddUser.Groups[3].Value);
           }
 
-
           Match matchDeleteUser= Regex.Match(miniSQLQuery, deleteUserPattern);
-
 
           if (matchDeleteUser.Success)
           {
               return new DeleteUser(matchDeleteUser.Groups[1].Value);
           }
 
+
             return null;
+
 
     }
 
