@@ -12,9 +12,12 @@ namespace DbManager
             //TODO DEADLINE 2
             //SELECT columnas FROM tabla patrón
             const string selectPattern = @"^SELECT\s+([a-zA-Z0-9\*,]+)\s+FROM\s+([a-zA-Z0-9]+)$";
+
+            //SELECT WHERE
+            const string selectWherePattern= @"^SELECT\s+([a-zA-Z0-9\*,]+)\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+([a-zA-Z0-9]+)\s*(<|>|=)\s*(.+?)\s*";
            
            //INSERT INTO tabla VALUES columnas patrón
-            const string insertPattern = @"^\s*INSERT\s+INTO\s+([a-zA-Z0-9]+)\s+VALUES\s*\((.+?)\)\s*$";
+            const string insertPattern = @"^INSERT\s+INTO\s+([a-zA-Z0-9]+)\s+VALUES\s*\((.+?)\)\s*$";
             
            //DROP TABLE tabla patrón
             const string dropTablePattern = @"^DROP\s+TABLE\s+([a-zA-Z0-9]+)$";
@@ -25,7 +28,7 @@ namespace DbManager
 
             const string updateTablePattern = @"^UPDATE\s+([a-zA-Z0-9]+)\s+SET\s+([a-zA-Z0-9\s=,\.']+)\s+WHERE\s+(.+)$";
 
-            const string deletePattern = @"^\s*DELETE\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+([a-zA-Z0-9]+)\s*(<|>|=)\s*(.+?)\s*$";
+            const string deletePattern = @"^DELETE\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+([a-zA-Z0-9]+)\s*(<|>|=)\s*(.+?)\s*$";
 
             //TODO DEADLINE 4
             const string createSecurityProfilePattern = @"^CREATE\s+SECURITY\s+PROFILE\s+([a-zA-Z0-9]+)$";
@@ -56,7 +59,30 @@ namespace DbManager
                return new Select(matchSelect.Groups[2].Value, CommaSeparatedNames(matchSelect.Groups[1].Value)); 
            }
 
-           Match matchInsert= Regex.Match(miniSQLQuery, insertPattern, RegexOptions.IgnoreCase);
+           Match matchSelectWhere= Regex.Match(miniSQLQuery, selectWherePattern);
+
+           if(matchSelectWhere.Success)
+            {
+                string tableName= matchSelectWhere.Groups[2].Value;
+                List<string> columns= CommaSeparatedNames(matchSelectWhere.Groups[1].Value);
+                string operador= matchSelectWhere.Groups[4].Value;
+                string col= matchSelectWhere.Groups[3].Value;
+                string valor= matchSelectWhere.Groups[5].Value;
+
+                if (valor.Contains(" ") && !valor.StartsWith("'"))
+                {
+                    return null;
+                    
+                }
+                string valorLimpio= valor.Trim('\'');
+
+                Condition condicion= new Condition(col, operador, valorLimpio);
+                return new Select(tableName, columns, condicion);
+              
+
+            }
+
+           Match matchInsert= Regex.Match(miniSQLQuery, insertPattern);
 
            if (matchInsert.Success)
            {
@@ -112,11 +138,10 @@ namespace DbManager
            }
             
             //A ver si esto arregla el IncorrectCapitalization
-            Match matchDrop= Regex.Match(miniSQLQuery, dropTablePattern, RegexOptions.IgnoreCase);
+            Match matchDrop= Regex.Match(miniSQLQuery, dropTablePattern);
 
            if (matchDrop.Success)
            {
-               //Los group corresponden al grupo de paréntesis de la expresión regular de arriba
                return new DropTable(matchDrop.Groups[1].Value);  
            }
 
