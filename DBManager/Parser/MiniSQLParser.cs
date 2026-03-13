@@ -1,6 +1,7 @@
 using DbManager.Parser;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text.RegularExpressions;
 
 namespace DbManager
@@ -26,7 +27,7 @@ namespace DbManager
             //And then, an execution error should be given if a CreateTable without columns is executed
             const string createTablePattern = @"^CREATE\s+TABLE\s+([a-zA-Z0-9]+)\s*\((?:([a-zA-Z0-9]+\s+(?:INT|DOUBLE|TEXT))(?:,([a-zA-Z0-9]+\s+(?:INT|DOUBLE|TEXT)))*)?\)$";
 
-            const string updateTablePattern = @"^\s*UPDATE\s+([a-zA-Z0-9]+)\s+SET\s+([a-zA-Z0-9\s=,\.']+)\s+WHERE\s+([a-zA-Z0-9\s<>=\.\']+)\s*$";
+            const string updateTablePattern = @"^UPDATE\s+([a-zA-Z0-9]+)\s+SET\s+([a-zA-Z0-9\s=,.]+)\s+WHERE\s+([a-zA-Z0-9\s<>=.]+)$";
 
             const string deletePattern = @"^DELETE\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+([a-zA-Z0-9]+)\s*(<|>|=)\s*(.+?)\s*$";
 
@@ -157,20 +158,19 @@ namespace DbManager
                return new DropTable(matchDrop.Groups[1].Value);  
            }
 
-            Match matchUpdate = Regex.Match(miniSQLQuery, updateTablePattern);
+            Match matchUpdate = Regex.Match(miniSQLQuery, updateTablePattern, RegexOptions.IgnoreCase);
 
             if (matchUpdate.Success)
             {
-                //Los group corresponden al grupo de paréntesis de la expresión regular de arriba
                 string tableName = matchUpdate.Groups[1].Value;
-                string value = matchUpdate.Groups[2].Value;
-                string condicionTxt = matchUpdate.Groups[3].Value;
+                string set = matchUpdate.Groups[2].Value;
+                string where = matchUpdate.Groups[3].Value;
 
                 List<SetValue> setValues = new List<SetValue>();
+                
+                string[] parts = set.Split(',');
 
-                string[] partes = value.Split(',', StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (string part in partes)
+                foreach (string part in parts)
                 {
                     string[] v = part.Split('=');
 
@@ -180,50 +180,40 @@ namespace DbManager
                     }
 
                     string columnName = v[0].Trim();
-                    string val = v[1].Trim();
+                    string valores = v[1].Trim();
 
-                    if ((val.StartsWith("'") && !val.EndsWith("'")) || (!val.StartsWith("'") && val.EndsWith("'")))
-                    {
-                        return null;
-                    }
+                    bool startsWith = valores.StartsWith("'");
+                    bool endsWith = valores.EndsWith("'");
 
-                    if (val.Contains(" ") && !val.StartsWith("'"))
-                    {
-                        return null;
-                    }
+                    if (startsWith != endsWith) return null;
+                    if (!startsWith && valores.Contains(" ")) return null;
 
-                    setValues.Add(new SetValue(columnName, val));
+                    string valor = valores.Trim('\'');
+                    setValues.Add(new SetValue(columnName, valor));
                 }
 
-                char[] opreadores = new char[] { '=', '>', '<' };
-                string[] parts = condicionTxt.Split(opreadores, StringSplitOptions.RemoveEmptyEntries);
+                char[] operadores = new char[] { '=', '>', '<' };
+                string[] whereParts = where.Split(operadores, StringSplitOptions.RemoveEmptyEntries);
 
-                if (parts.Length == 2)
+                if (whereParts.Length == 2)
                 {
-                    string column = parts[0].Trim();
-                    string value1 = parts[1].Trim();
+                    string whereColumn = whereParts[0].Trim();
+                    string whereValores = whereParts[1].Trim();
 
-                    if (value1.StartsWith("'") && !value1.EndsWith("'"))
-                    {
-                        return null;
-                    }
+                    bool startsWith = whereValores.StartsWith("'");
+                    bool endsWith = whereValores.EndsWith("'");
 
-                    //Por defecto, que normalmente suele ser un =
-                    string operadorElegido = "=";
+                    if (startsWith != endsWith) return null;
+                    if (!startsWith && whereValores.Contains(" ")) return null;
 
-                    if (condicionTxt.Contains(">"))
-                    {
-                        operadorElegido = ">";
+                    string whereValor = whereValores.Trim('\'');
 
-                    }
-                    else if (condicionTxt.Contains("<"))
-                    {
-                        operadorElegido = "<";
-                    }
+                    string op = "=";
+                    if (where.Contains(">")) op = ">";
+                    else if (where.Contains("<")) op = "<";
 
-                    Condition condicion = new Condition(column, operadorElegido, value1);
-                    return new Update(tableName, setValues, condicion);
-
+                    Condition condition = new Condition(whereColumn, op, whereValor);
+                    return new Update(tableName, setValues, condition);
                 }
             }
 

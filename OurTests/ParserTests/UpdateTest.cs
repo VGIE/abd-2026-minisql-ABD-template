@@ -45,6 +45,22 @@ namespace OurTests
         }
 
         [Fact]
+        public void UpdateStringWithSpaces()
+        {
+            Database db = Database.CreateTestDatabase();
+            Condition condition = new Condition(Table.TestColumn1Name, "=", Table.TestColumn1Row1);
+            List<SetValue> values = new List<SetValue> 
+            {
+                new SetValue(Table.TestColumn1Name, "Juan Perez") 
+            };
+
+            Update update = new Update(Table.TestTableName, values, condition);
+            string result = update.Execute(db);
+
+            Assert.Equal(Constants.UpdateSuccess, result);
+        }
+
+        [Fact]
         public void UpdateInvalidCondition()
         {
             Database database = Database.CreateTestDatabase();
