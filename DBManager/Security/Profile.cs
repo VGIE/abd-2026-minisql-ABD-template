@@ -17,7 +17,6 @@ namespace DbManager.Security
         public bool GrantPrivilege(string table, Privilege privilege)
         {
             //TODO DEADLINE 5: Grant this privilege on this table. Return false if there is an error, true otherwise
-            bool yaEsta=false;
             
             List<Privilege> privileges=new List<Privilege>();
             if (!PrivilegesOn.ContainsKey(table)) 
@@ -46,7 +45,7 @@ namespace DbManager.Security
                 return false;
             }
             PrivilegesOn[table].Remove(privilege);
-            return false;
+            return true;
 
         }
 
