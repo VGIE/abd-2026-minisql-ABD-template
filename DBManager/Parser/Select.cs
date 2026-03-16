@@ -26,14 +26,12 @@ namespace DbManager
             //TODO DEADLINE 3: Run the query and return the table as a string (or the last error in the database)
             Table result= database.Select(Table, Columns, Where);
 
-             if(database.LastErrorMessage!=null)
+            if (result == null)
             {
-             return database.LastErrorMessage;
-
+                return database.LastErrorMessage;
             }
-            
+
             return result.ToString();
-            
         }
     }
 }

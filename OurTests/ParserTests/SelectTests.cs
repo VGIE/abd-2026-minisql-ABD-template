@@ -59,8 +59,8 @@ namespace OurTests
 
         }
 
-        [Fact]
 
+        [Fact]
         public void TestSelectWhereValueWIthSpacesWithQuotesNotNull()
         {
             string query= "SELECT Nombre FROM Personas WHERE Name = 'Lupe'";
@@ -71,6 +71,18 @@ namespace OurTests
         }
 
 
+        [Fact]
+        public void TestSelectNonExistentColumn_ShouldReturnError()
+        {
+            Database db = Database.CreateTestDatabase();
+            List<string> columns = new List<string> { "ColumnaInexistente" };
+            Condition condition = null;
+
+            Select selectQuery = new Select(Table.TestTableName, columns, condition);
+            string result = selectQuery.Execute(db);
+
+            Assert.Equal(Constants.ColumnDoesNotExistError, result);
+        }
 
     }
     
