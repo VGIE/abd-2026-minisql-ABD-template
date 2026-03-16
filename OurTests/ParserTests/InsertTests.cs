@@ -45,6 +45,46 @@ namespace OurTests
             
         }
 
+        [Fact]
+          public void TestInsertSpaceInStringReturnsNull()
+          {
+               string query= "INSERT INTO Personas VALUES (10 00, 'Dato')";
+
+               Insert result = MiniSQLParser.Parse(query) as Insert;
+
+               Assert.Null(result);
+          }
+
+          [Fact]
+          public void TestInsertUnbalancedQuotesReturnsNull()
+          {
+               string query= "INSERT INTO Personas VALUES ('Dato)";
+
+               Insert result = MiniSQLParser.Parse(query) as Insert;
+
+               Assert.Null(result);
+          }
+
+          [Fact]
+          public void TestInsertMissingComaReturnsNull()
+          {
+               string query= "INSERT INTO Personas VALUES ('Dato1' 'Dato2')";
+
+               Insert result = MiniSQLParser.Parse(query) as Insert;
+
+               Assert.Null(result);
+          }
+
+          [Fact]
+          public void TestInsertInvalidSpaceAtTheEndReturnsNull()
+          {
+               string query= "INSERT INTO Personas VALUES ('Dato' )";
+
+               Insert result = MiniSQLParser.Parse(query) as Insert;
+
+               Assert.Null(result);
+          }
+
     }
 
 

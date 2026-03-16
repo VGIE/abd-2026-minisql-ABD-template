@@ -18,14 +18,14 @@ namespace DbManager
             const string selectWherePattern= @"^SELECT\s+([a-zA-Z0-9\*,]+)\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+([a-zA-Z0-9]+)\s*(<|>|=)\s*(.+)";
 
            //INSERT INTO tabla VALUES columnas patrón
-            const string insertPattern = @"^INSERT\s+INTO\s+(\w+)\s+VALUES\s*\((('[-]?\d+(\.\d+)?'|'[^']+')(?:\s*,\s*('[-]?\d+(\.\d+)?'|'[^']+'))*)\)$";
+            const string insertPattern = @"^INSERT\s+INTO\s+(\w+)\s+VALUES\s*\(\s*(('[-]?\d+(\.\d+)?'|'[^']+')(?:\s*,\s*('[-]?\d+(\.\d+)?'|'[^']+'))*)\)$";
             
            //DROP TABLE tabla patrón
             const string dropTablePattern = @"^DROP\s+TABLE\s+([a-zA-Z0-9]+)$";
             
             //Note: The parsing of CREATE TABLE should accept empty columns "()"
             //And then, an execution error should be given if a CreateTable without columns is executed
-            const string createTablePattern = @"^CREATE\s+TABLE\s+([a-zA-Z0-9]+)\s*\((?:([a-zA-Z0-9]+\s+(?:INT|DOUBLE|TEXT))(?:,([a-zA-Z0-9]+\s+(?:INT|DOUBLE|TEXT)))*)?\)$";
+            const string createTablePattern = @"^CREATE\s+TABLE\s+(\w+)\s+\(\s*(\w+\s+(?:INT|DOUBLE|TEXT)(?:\s*,\s*\w+\s+(?:INT|DOUBLE|TEXT))*)\s*\)$";
 
             const string updateTablePattern = @"^UPDATE\s+(\w+)\s+SET\s+(\w+=('[-]?\d+(\.\d+)?'|'[^']+')(?:,(\w+=('[-]?\d+(\.\d+)?'|'[^']+'))*)?)\s+WHERE\s+(\w+)(=|<|>)('[-]?\d+(\.\d+)?'|'[^']+')$";
 
@@ -97,16 +97,17 @@ namespace DbManager
 
                 foreach (string v in valoresSucio)
                 {
-                    if (v.Contains(" ") && !v.StartsWith("'"))
+                    string val= v.Trim();
+                    if (val.Contains(" ") && !val.StartsWith("'"))
                     {
                     return null;
                     }
                     
-                    if(v.StartsWith("'") && !v.EndsWith("'") || (!v.StartsWith("'") && v.EndsWith("'")))
+                    if(val.StartsWith("'") && !val.EndsWith("'") || (!val.StartsWith("'") && val.EndsWith("'")))
                     {
                         return null;   
                     }
-                    valoresLimpio.Add(v.Trim('\''));
+                    valoresLimpio.Add(val.Trim('\''));
                 }
                return new Insert(tableName, valoresLimpio);
            }
@@ -116,28 +117,44 @@ namespace DbManager
            if (matchCreateTable.Success)
            {
                string tableName= matchCreateTable.Groups[1].Value;
-               List<string> stringColumns= CommaSeparatedNames(matchCreateTable.Groups[2].Value);
+               
+               string stringColumns= matchCreateTable.Groups[2].Value;
+
+               List<string> columnParts= CommaSeparatedNames(stringColumns);
 
                List<ColumnDefinition> columnDefinitions= new List<ColumnDefinition>();
 
-               foreach(string s in stringColumns)
+               foreach(string s in columnParts)
                {
-                   //El trim es para evitar los errores si hay espacios extra al haber escrito las columnas en el query
-                   //Split separa cada columna para quedarse con una cada vez
-                   string[] parts= s.Trim().Split(new[]{ ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                   string[] parts= s.Split(new[]{ ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                    //Solo nombre y tipo
                    if (parts.Length==2)
                    {
+
+                    string name= parts[0];
                     string typeInt= "INT";
                     string typeDouble= "DOUBLE";
                     string typeTxt= "TEXT";
-                    string type= parts[1].ToUpper();
-                        if (type==typeInt || type==typeDouble || type== typeTxt)
+
+                    string type= parts[1];
+                        if (type==typeInt)
                         {
-                            //Aquí usa parse para convertir el texto en el valor real del tipo que sea. True hace que INT e int sean válidos igual
-                            ColumnDefinition.DataType Rtype= (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, true);
-                            columnDefinitions.Add(new ColumnDefinition(Rtype, parts[0]));
+                            type= "Int";
+                            ColumnDefinition.DataType Rtype= (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
+                            columnDefinitions.Add(new ColumnDefinition(Rtype, name));
+                        }
+                        else if (type==typeDouble)
+                        {
+                            type="Double";
+                            ColumnDefinition.DataType Rtype= (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
+                            columnDefinitions.Add(new ColumnDefinition(Rtype, name));
+                        }else if (type== typeTxt)
+                        {
+                            type="String";
+                            ColumnDefinition.DataType Rtype= (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
+                            columnDefinitions.Add(new ColumnDefinition(Rtype, name));
+                            
                         }
                         else
                         {
