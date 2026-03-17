@@ -29,7 +29,7 @@ namespace OurTests
           [Fact]
           public void testCreateTableValidRegexQuery()
           {
-               string query= "CREATE TABLE Productos (ID INT,Precio DOUBLE,Descripcion TEXT)";
+               string query= "CREATE TABLE Productos (ID INT, Precio DOUBLE, Descripcion TEXT)";
 
                CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
                Assert.NotNull(result);
@@ -124,6 +124,26 @@ namespace OurTests
                CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
 
                Assert.Null(result);
+          }
+
+          [Fact]
+          public void TestCreateTableWithoutColumns()
+          {
+               string query= "CREATE TABLE Personas ( )";
+
+               CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
+
+               Assert.NotNull(result);
+          }
+
+          [Fact]
+          public void TestCreateTableWithoutColumnsAndSpaces()
+          {
+               string query= "CREATE TABLE Personas (  )";
+
+               CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
+
+               Assert.NotNull(result);
           }
      }
 }

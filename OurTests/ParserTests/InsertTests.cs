@@ -85,11 +85,17 @@ namespace OurTests
                Assert.Null(result);
           }
 
+          [Fact]
+          public void TestInsertValidQuery()
+          {
+               string query= "INSERT INTO Personas VALUES ('1', 'Hola')";
+
+               Insert result = MiniSQLParser.Parse(query) as Insert;
+
+               Assert.NotNull(result);
+          }
+
     }
-
-
-
-
 
 }
 
