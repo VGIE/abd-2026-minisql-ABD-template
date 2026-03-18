@@ -126,7 +126,6 @@ namespace OurTests
             Assert.Null(result);
         }
 
-        /*
         [Fact]
         public void TestCreateTableWithoutColumns()
         {
@@ -145,6 +144,6 @@ namespace OurTests
             CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
 
             Assert.NotNull(result);
-        }*/
+        }
     }
 }

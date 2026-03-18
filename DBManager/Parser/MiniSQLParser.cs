@@ -18,14 +18,14 @@ namespace DbManager
             const string selectWherePattern = @"^SELECT\s+([a-zA-Z0-9\*,]+)\s+FROM\s+([a-zA-Z0-9]+)\s+WHERE\s+([a-zA-Z0-9]+)\s*(<|>|=)\s*(.+)";
 
             //INSERT INTO tabla VALUES columnas patrón
-            const string insertPattern = @"^INSERT\s+INTO\s+(\w+)\s+VALUES\s*\(\s*(('[-]?\d+(\.\d+)?'|'[^']+')(?:\s*,\s*('[-]?\d+(\.\d+)?'|'[^']+'))*)\)$";
+            const string insertPattern = @"^INSERT\s+INTO\s+(\w+)\s+VALUES\s*\(\s*(('[-]?\d+(?:\.\d+)?'|'[^']+')(?:\s*,\s+('[-]?\d+(?:\.\d+)?'|'[^']+'))*)\)$";
 
             //DROP TABLE tabla patrón
             const string dropTablePattern = @"^DROP\s+TABLE\s+([a-zA-Z0-9]+)$";
 
             //Note: The parsing of CREATE TABLE should accept empty columns "()"
             //And then, an execution error should be given if a CreateTable without columns is executed
-            const string createTablePattern = @"^CREATE\s+TABLE\s+(\w+)\s+\(\s*(\w+\s+(?:INT|DOUBLE|TEXT)(?:\s*,\s*\w+\s+(?:INT|DOUBLE|TEXT))*)\s*\)$";
+            const string createTablePattern = @"^CREATE\s+TABLE\s+(\w+)\s+\(\s*(\w+\s+(?:INT|DOUBLE|TEXT)(?:\s*,\s+\w+\s+(?:INT|DOUBLE|TEXT))*)?\)$";
 
             const string updateTablePattern = @"^UPDATE\s+(\w+)\s+SET\s+(\w+=('[-]?\d+(\.\d+)?'|'[^']+')(?:,(\w+=('[-]?\d+(\.\d+)?'|'[^']+'))*)?)\s+WHERE\s+(\w+)(=|<|>)('[-]?\d+(\.\d+)?'|'[^']+')$";
 
@@ -51,6 +51,11 @@ namespace DbManager
             //For example, if the query is a "SELECT ...", there should be a match with selectPattern. We would create and return an instance of Select
             //initialized with the table name, the columns, and (possibly) an instance of Condition.
             //If there is no match, it means there is a syntax error. We will return null.
+
+            if (miniSQLQuery == null)
+            {
+                return null;
+            }
 
             Match matchSelect = Regex.Match(miniSQLQuery, selectPattern);
 
@@ -79,8 +84,6 @@ namespace DbManager
 
                 Condition condicion = new Condition(col, operador, valorLimpio);
                 return new Select(tableName, columns, condicion);
-
-
             }
 
             Match matchInsert = Regex.Match(miniSQLQuery, insertPattern);
@@ -124,50 +127,52 @@ namespace DbManager
 
                 List<ColumnDefinition> columnDefinitions = new List<ColumnDefinition>();
 
-
-
-                foreach (string s in columnParts)
+                if (!string.IsNullOrWhiteSpace(stringColumns))
                 {
-                    string[] parts = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    //Solo nombre y tipo
-                    if (parts.Length == 2)
+                    foreach (string s in columnParts)
                     {
+                        string[] parts = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        string name = parts[0];
-                        string typeInt = "INT";
-                        string typeDouble = "DOUBLE";
-                        string typeTxt = "TEXT";
+                        //Solo nombre y tipo
+                        if (parts.Length == 2)
+                        {
 
-                        string type = parts[1];
-                        if (type == typeInt)
-                        {
-                            type = "Int";
-                            ColumnDefinition.DataType Rtype = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
-                            columnDefinitions.Add(new ColumnDefinition(Rtype, name));
-                        }
-                        else if (type == typeDouble)
-                        {
-                            type = "Double";
-                            ColumnDefinition.DataType Rtype = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
-                            columnDefinitions.Add(new ColumnDefinition(Rtype, name));
-                        }
-                        else if (type == typeTxt)
-                        {
-                            type = "String";
-                            ColumnDefinition.DataType Rtype = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
-                            columnDefinitions.Add(new ColumnDefinition(Rtype, name));
+                            string name = parts[0];
+                            string typeInt = "INT";
+                            string typeDouble = "DOUBLE";
+                            string typeTxt = "TEXT";
 
+                            string type = parts[1];
+                            if (type == typeInt)
+                            {
+                                type = "Int";
+                                ColumnDefinition.DataType Rtype = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
+                                columnDefinitions.Add(new ColumnDefinition(Rtype, name));
+                            }
+                            else if (type == typeDouble)
+                            {
+                                type = "Double";
+                                ColumnDefinition.DataType Rtype = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
+                                columnDefinitions.Add(new ColumnDefinition(Rtype, name));
+                            }
+                            else if (type == typeTxt)
+                            {
+                                type = "String";
+                                ColumnDefinition.DataType Rtype = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), type, false);
+                                columnDefinitions.Add(new ColumnDefinition(Rtype, name));
+
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                            //Aquí faltaría una parte pero habría algo, así que es error
                         }
-                        else
+                        else if (parts.Length != 0)
                         {
                             return null;
                         }
-                        //Aquí faltaría una parte pero habría algo, así que es error
-                    }
-                    else if (parts.Length != 0)
-                    {
-                        return null;
                     }
                 }
 
