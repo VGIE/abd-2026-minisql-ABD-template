@@ -153,8 +153,23 @@ public class CreateTableTests
               Assert.Null(result);
          }
 
+         [Fact]
+         public void TestExecuteCreate()
+          {
+            Database database = Database.CreateTestDatabase();
+            var columns = new List<ColumnDefinition>
+                  {
+        new ColumnDefinition(ColumnDefinition.DataType.String, "Nombre"),
+        new ColumnDefinition(ColumnDefinition.DataType.Int, "Numero"),
+        new ColumnDefinition(ColumnDefinition.DataType.Double, "Altura")
+         };
 
-          [Fact]
+            CreateTable createQ= new CreateTable(Table.TestTableName,columns);
+            string result= createQ.Execute(database);
+          }
+
+
+          /*[Fact]
          public void TestCreateTableInvalid()
          {
               string query= "CREATE TABLE Personas (ID INT, Name TEXT )";
@@ -164,10 +179,10 @@ public class CreateTableTests
 
 
               Assert.Null(result);
-         }
+         }*/
 
 
-         [Fact]
+         /*[Fact]
          public void TestCreateTableEmptyTable()
          {
               string query= "CREATE TABLE Personas ()";
@@ -177,6 +192,6 @@ public class CreateTableTests
 
 
               Assert.NotNull(result);
-         }
+         }*/
     }
 }

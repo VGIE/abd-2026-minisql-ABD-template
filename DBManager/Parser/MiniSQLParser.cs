@@ -22,14 +22,13 @@ namespace DbManager
 
           //INSERT INTO tabla VALUES columnas patrón
            const string insertPattern = @"^INSERT\s+INTO\s+(\w+)\s+VALUES\s*\(\s*(('[-]?\d+(\.\d+)?'|'[^']+')(?:\s*,\s*('[-]?\d+(\.\d+)?'|'[^']+'))*)\)$";
-           
+          
           //DROP TABLE tabla patrón
            const string dropTablePattern = @"^DROP\s+TABLE\s+([a-zA-Z0-9]+)$";
           
            //Note: The parsing of CREATE TABLE should accept empty columns "()"
            //And then, an execution error should be given if a CreateTable without columns is executed
-           const string createTablePattern = @"^CREATE\s+TABLE\s+(\w+)\s+\(\s*(\w+\s+(?:INT|DOUBLE|TEXT)(?:\s*,\s\w+\s+(?:INT|DOUBLE|TEXT))*)?\)$";
-
+           const string createTablePattern = @"^CREATE\s+TABLE\s+(\w+)\s+\(\s*(\w+\s+(?:INT|DOUBLE|TEXT)(?:\s*,\s*\w+\s+(?:INT|DOUBLE|TEXT))*)\s*\)$";
 
            const string updateTablePattern = @"^UPDATE\s+(\w+)\s+SET\s+(\w+=('[-]?\d+(\.\d+)?'|'[^']+')(?:,(\w+=('[-]?\d+(\.\d+)?'|'[^']+'))*)?)\s+WHERE\s+(\w+)(=|<|>)('[-]?\d+(\.\d+)?'|'[^']+')$";
 
@@ -59,13 +58,6 @@ namespace DbManager
            //For example, if the query is a "SELECT ...", there should be a match with selectPattern. We would create and return an instance of Select
            //initialized with the table name, the columns, and (possibly) an instance of Condition.
            //If there is no match, it means there is a syntax error. We will return null.
-
-
-           if (miniSQLQuery==null)
-           {
-               return null;
-           }
-
 
           Match matchSelect= Regex.Match(miniSQLQuery, selectPattern);
 
