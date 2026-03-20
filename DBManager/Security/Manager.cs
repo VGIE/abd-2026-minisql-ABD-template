@@ -42,11 +42,13 @@ namespace DbManager.Security
         {
             //TODO DEADLINE 5: Add this privilege on this table to the profile with this name
             //If the profile or the table don't exist, do nothing
-
-            Profile p = ProfileByName(profileName);
-            if (p == null) { return; }
-            if (table == null) { return; }
-            p.GrantPrivilege(table, privilege);
+            if (IsUserAdmin())
+            {
+                Profile p = ProfileByName(profileName);
+                if (p == null) { return; }
+                if (table == null) { return; }
+                p.GrantPrivilege(table, privilege);
+            }
 
         }
 
@@ -54,44 +56,50 @@ namespace DbManager.Security
         {
             //TODO DEADLINE 5: Remove this privilege on this table to the profile with this name
             //If the profile or the table don't exist, do nothing
-
-            Profile p = ProfileByName(profileName);
-            if (p == null) { return; }
-            if (table == null) { return; }
-            p.RevokePrivilege(table, privilege);
+            if (IsUserAdmin())
+            {
+                Profile p = ProfileByName(profileName);
+                if (p == null) { return; }
+                if (table == null) { return; }
+                p.RevokePrivilege(table, privilege);
+            }
 
         }
 
         public bool IsGrantedPrivilege(string username, string table, Privilege privilege)
         {
             //TODO DEADLINE 5: Return true if the username has this privilege on this table. False otherwise (also in case of error)
-
-            Profile p = ProfileByUser(username);
-            if (p == null)
+            if (ProfileByName(username) != null)
             {
-                return false;
+                Profile p = ProfileByUser(username);
+                if (p == null)
+                {
+                    return false;
+                }
+                //Preguntar a borja si la tabla puede ser null
+                if (table == null)
+                {
+                    return false;
+                }
+                return p.IsGrantedPrivilege(table, privilege);
             }
-            if (table == null)
-            {
-                return false;
-            }
-            return p.IsGrantedPrivilege(table, privilege);
-
-
+            return false;
         }
 
         public void AddProfile(Profile profile)
         {
             //TODO DEADLINE 5: Add this profile
-            if (profile != null)
+            if (IsUserAdmin())
             {
-                if (ProfileByName(profile.Name) == null)
+                if (profile != null)
                 {
-                    Profiles.Add(profile);
+                    if (ProfileByName(profile.Name) == null)
+                    {
+                        Profiles.Add(profile);
+                    }
+
                 }
-
             }
-
 
         }
 
@@ -147,11 +155,14 @@ namespace DbManager.Security
         public bool RemoveProfile(string profileName)
         {
             //TODO DEADLINE 5: Remove this profile
-
-            Profile p = ProfileByName(profileName);
-            if (p == null) { return false; }
-            Profiles.Remove(p);
-            return true;
+            if (IsUserAdmin())
+            {
+                Profile p = ProfileByName(profileName);
+                if (p == null) { return false; }
+                Profiles.Remove(p);
+                return true;
+            }
+            return false;
         }
 
         public static Manager Load(string databaseName, string username)
