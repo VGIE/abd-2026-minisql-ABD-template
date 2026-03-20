@@ -21,8 +21,8 @@ namespace DbManager
 
 
           //INSERT INTO tabla VALUES columnas patrón
-           const string insertPattern = @"^INSERT\s+INTO\s+(\w+)\s+VALUES\s*\(\s*(('[-]?\d+(\.\d+)?'|'[^']+')(?:\s*,\s*('[-]?\d+(\.\d+)?'|'[^']+'))*)\)$";
-          
+           const string insertPattern = @"^INSERT\s+INTO\s+(\w+)\s+VALUES\s*\(\s*(('[-]?\d+(\.\d+)?'|'[^']+')(?:\s*,\s*('[-]?\d+(\.\d+)?'|'[^']+'))*)\)$";    
+                
           //DROP TABLE tabla patrón
            const string dropTablePattern = @"^DROP\s+TABLE\s+([a-zA-Z0-9]+)$";
           
@@ -53,11 +53,16 @@ namespace DbManager
            const string deleteUserPattern = @"^DELETE\s+USER\s+([a-zA-Z0-9]+)$";
 
 
-           //TODO DEADLINE 2
-           //Parse query using the regular expressions above one by one. If there is a match, create an instance of the query with the parsed parameters
-           //For example, if the query is a "SELECT ...", there should be a match with selectPattern. We would create and return an instance of Select
-           //initialized with the table name, the columns, and (possibly) an instance of Condition.
-           //If there is no match, it means there is a syntax error. We will return null.
+            //TODO DEADLINE 2
+            //Parse query using the regular expressions above one by one. If there is a match, create an instance of the query with the parsed parameters
+            //For example, if the query is a "SELECT ...", there should be a match with selectPattern. We would create and return an instance of Select
+            //initialized with the table name, the columns, and (possibly) an instance of Condition.
+            //If there is no match, it means there is a syntax error. We will return null.
+
+            if (miniSQLQuery== null)
+            {
+                return null;
+            }
 
           Match matchSelect= Regex.Match(miniSQLQuery, selectPattern);
 
