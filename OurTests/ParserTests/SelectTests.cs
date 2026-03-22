@@ -84,6 +84,29 @@ namespace OurTests
             Assert.Equal(Constants.ColumnDoesNotExistError, result);
         }
 
+        [Fact]
+        public void TestSyntaxErrorUpdatesLastErrorMessage()
+        {
+            Database db = Database.CreateTestDatabase();
+
+            string result = db.ExecuteMiniSQLQuery("SELECT FROM"); 
+
+            Assert.Equal(Constants.SyntaxError, result);
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage); 
+        }
+
+        [Fact]
+        public void TestSyntaxErrorDoesNotPersist()
+        {
+            Database db = Database.CreateTestDatabase();
+
+            db.ExecuteMiniSQLQuery("SELECT FROM");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT ColumnaInexistente FROM " + Table.TestTableName);
+            Assert.Equal(Constants.ColumnDoesNotExistError, db.LastErrorMessage);
+        }
+
     }
     
 }

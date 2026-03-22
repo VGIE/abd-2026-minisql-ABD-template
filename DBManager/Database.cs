@@ -157,6 +157,7 @@ namespace DbManager
                     return null;
                 }
             }
+           
             Table table = TableByName(tableName).Select(columns, condition);
             return table;
 
@@ -366,7 +367,10 @@ namespace DbManager
 
             //If the parser returns null, there must be a syntax error (or the parser is failing)
             if (miniSQLQuery == null)
+            {
+                LastErrorMessage = Constants.SyntaxError;
                 return Constants.SyntaxError;
+            }
 
             //Once the query is parsed, we run it on this database
             return miniSQLQuery.Execute(this);
@@ -377,9 +381,6 @@ namespace DbManager
         {
             return SecurityManager.IsUserAdmin();
         }
-
-
-
 
 
         //All these methods are ONLY FOR TESTING. Use them to simplify creating unit tests:
