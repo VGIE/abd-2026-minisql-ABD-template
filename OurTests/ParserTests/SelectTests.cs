@@ -63,7 +63,7 @@ namespace OurTests
         [Fact]
         public void TestSelectWhereValueWIthSpacesWithQuotesNotNull()
         {
-            string query= "SELECT Nombre FROM Personas WHERE Name = 'Lupe'";
+            string query= "SELECT Nombre FROM Personas WHERE Name='Lupe'";
             Select result = MiniSQLParser.Parse(query) as Select;
 
             Assert.NotNull(result);
@@ -72,7 +72,7 @@ namespace OurTests
 
 
         [Fact]
-        public void TestSelectNonExistentColumn_ShouldReturnError()
+        public void TestSelectNonExistentColumn()
         {
             Database db = Database.CreateTestDatabase();
             List<string> columns = new List<string> { "ColumnaInexistente" };
@@ -107,6 +107,86 @@ namespace OurTests
             Assert.Equal(Constants.ColumnDoesNotExistError, db.LastErrorMessage);
         }
 
+        [Fact]
+        public void TestSelectSyntaxErrors()
+        {
+            Database db = Database.CreateTestDatabase();
+
+            db.ExecuteMiniSQLQuery("SELECT dni, nombre FROM Tabla");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni,  FROM Tabla");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni,,nombre FROM Tabla");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni Tabla");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad 20");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad<");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE nombre='Juan");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad!=20");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE nombre=Juan Perez");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("");
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery(null);
+            Assert.Equal(Constants.SyntaxError, db.LastErrorMessage);
+        }
+
+        [Fact]
+        public void TestSelectValidQueries()
+        {
+            Database db = Database.CreateTestDatabase();
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni,nombre FROM Tabla");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT * FROM Tabla");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad=20");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad=-20");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE nombre='Juan'");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad>18");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE edad<6.5");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT dni FROM Tabla WHERE nombre='Juan Perez'");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT col1,col2 FROM Tabla1");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+
+            db.ExecuteMiniSQLQuery("SELECT    dni    FROM    Tabla");
+            Assert.NotEqual(Constants.SyntaxError, db.LastErrorMessage);
+        }
     }
     
 }
