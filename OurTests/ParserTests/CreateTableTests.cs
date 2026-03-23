@@ -43,14 +43,8 @@ public class CreateTableTests
         {
              string query= "CREATE TABLE Productos (ID INT,Precio DOUBLE,Descripcion TEXT)";
 
-
-
-
              CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
              Assert.NotNull(result);
-
-
-
 
         }
 
@@ -231,10 +225,10 @@ public class CreateTableTests
          }
 
 
-        /* [Fact]
+        [Fact]
         public void TestCreateTableInvalid()
         {
-             string query= "CREATE TABLE Personas (ID INT, Name TEXT)";
+             string query= "CREATE TABLE Personas(ID INT, Name TEXT)";
 
 
              CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
@@ -250,16 +244,10 @@ public class CreateTableTests
         {
              string query= "CREATE TABLE Personas ()";
 
-
-
-
              CreateTable result = MiniSQLParser.Parse(query) as CreateTable;
 
-
-
-
              Assert.NotNull(result);
-        }*/
+        }
 
 
    }
