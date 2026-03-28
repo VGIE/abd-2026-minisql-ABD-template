@@ -26,7 +26,13 @@ namespace DbManager
         {
             //TODO DEADLINE 5: Run the query and return the appropriate message
             //UsersProfileIsNotGrantedRequiredPrivilege, SecurityProfileDoesNotExistError, AddUserSuccess
-            Profile profile= database.SecurityManager.ProfileByName(Username);
+                
+             if (!database.SecurityManager.IsUserAdmin())
+            {
+                return "Error: The security profile of the user does not have the required privilege to perform the operation";
+            }
+
+            Profile profile= database.SecurityManager.ProfileByName(ProfileName);
 
             if(profile==null)
             {
@@ -34,17 +40,10 @@ namespace DbManager
             }
 
                 User user= new User();
-                user.Username= Username;
-                user.EncryptedPassword=Password;
-
                 profile.Users.Add(user);
 
                 database.SecurityManager.AddProfile(profile);
-                
-             if (!database.SecurityManager.IsUserAdmin())
-            {
-                return "Error: The security profile of the user does not have the required privilege to perform the operation";
-            }
+            
                 
              if(database.LastErrorMessage!=null)
             {
