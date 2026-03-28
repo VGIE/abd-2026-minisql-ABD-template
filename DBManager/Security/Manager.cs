@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DbManager.Security
@@ -169,15 +171,70 @@ namespace DbManager.Security
         public static Manager Load(string databaseName, string username)
         {
             //TODO DEADLINE 5: Load all the profiles and users saved for this database. The Manager instance should be created with the given username
+            
+            string filePath= databaseName+ "_Security.json";
 
-            return null;
+            Manager manager = new Manager(username);
 
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    string jsonString= File.ReadAllText(filePath);
+                    var options= new JsonSerializerOptions
+                    {
+                        IncludeFields = true,
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    var Listprofiles= JsonSerializer.Deserialize<List<Profile>>(jsonString, options);
+                    if(Listprofiles != null)
+                    {
+                        manager.Profiles.Clear();
+                        //AddRange añade a la lista del perfil concreto todos los perfiles ya deserializados
+                        manager.Profiles.AddRange(Listprofiles);
+                    }
+                    
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al cargar la información de seguridad: " + ex.Message);   
+                }
+            }
+            else
+            {
+                Console.WriteLine("No se encontró el archivo de seguridad para la base de datos: " + databaseName);
+            }
+            return manager;
         }
 
         public void Save(string databaseName)
         {
-            //TODO DEADLINE 5: Save all the profiles and users/passwords created for this database.
+             //TODO DEADLINE 5: Save all the profiles and users/passwords created for this database.
 
+            try
+            {
+                string filePath= databaseName+ "_Security.json";
+
+                var options= new JsonSerializerOptions
+                {
+                    //Para que el json sea legible añadiendo espacios y saltos de línea
+                    WriteIndented = true, 
+                    //Para incluir los campos privados y que no se pierda ningún dato 
+                    IncludeFields = true,
+                    //Para mayúsculas y minúsculas sin que importe
+                    PropertyNameCaseInsensitive = true
+                };
+                
+                //JsonSerializer.Serialize se encarga de recorrer la lista de perfiles y sus usuarios
+                //y transforma toda la información de nombres, constraseñas etc en formato json 
+                string jsonString= JsonSerializer.Serialize(this.Profiles, options);
+                File.WriteAllText(filePath, jsonString);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al guardar la información de seguridad: " + ex.Message);
+            }
         }
     }
 }

@@ -36,6 +36,15 @@ namespace DbManager
             m_username = adminUsername;
             SecurityManager = new Manager(m_username);
 
+            //Esto es para crear el perfil de admin con su usuario y contraseña para luego poder cargar la bd bien. 
+            //Si no, al cargar la bd el manager no tendría ni perfil ni usuario para comprobar la contraseña 
+            Profile adminProfile = new Profile{Name=Profile.AdminProfileName};
+            User adminUser = new User { Username = adminUsername, EncryptedPassword = Encryption.Encrypt(adminPassword) };
+            adminProfile.Users.Add(adminUser);
+
+            //Añadimos el perfil a manager 
+            SecurityManager.Profiles.Add(adminProfile);
+
         }
 
         public bool AddTable(Table table)
@@ -284,6 +293,12 @@ namespace DbManager
             try
             {
 
+                Manager manager = Manager.Load(databaseName, username);
+                if (manager == null || !manager.IsPasswordCorrect(username, password))
+                {
+                    return null;
+                }
+
                 Database db = new Database();
                 using (FileStream fs = new FileStream(databaseName, FileMode.Open))
                 using (BinaryReader reader = new BinaryReader(fs))
@@ -334,21 +349,9 @@ namespace DbManager
                     }
 
                 }
-                /* descomentar solo para DEADLINE 5
-                Manager manager= Manager.Load(databaseName, username);
-
-                if(manager==null)
-                {
-                    return null;
-                }
-
-                if(!manager.IsPasswordCorrect(username, password))
-                {
-                    return null;
-                }
-                
+               
                 db.SecurityManager=manager;
-                */
+                
                 return db;
 
 

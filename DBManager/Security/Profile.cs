@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DbManager.Security
@@ -12,6 +13,7 @@ namespace DbManager.Security
         public string Name { get; set; }
         public List<User> Users { get; set; } = new List<User>();
 
+        [JsonInclude]
         public Dictionary<string, List<Privilege>> PrivilegesOn { get; private set; } = new Dictionary<string, List<Privilege>>();
 
         public bool GrantPrivilege(string table, Privilege privilege)

@@ -205,5 +205,69 @@ namespace OurTests.SecurityTest
 
         }
 
+        [Fact]
+        
+        public void testManagerSaveLoad()
+        {
+            string dbName= "Personas";
+            string adminUser= "Admin";
+            string adminPass= "1234";
+            Manager manager = new Manager(adminUser);
+
+            Profile readerP= new Profile { Name = "Reader" };
+            User user= new User("Lupe","constraseña1106");
+            readerP.Users.Add(user);
+
+            readerP.GrantPrivilege("TablaX", Privilege.Select);
+            manager.Profiles.Add(readerP);
+
+            Profile adminProfile = new Profile { Name = Profile.AdminProfileName };
+            adminProfile.Users.Add(new User(adminUser, Encryption.Encrypt(adminPass)));
+            manager.Profiles.Add(adminProfile);
+
+            manager.Save(dbName);
+
+            Manager loadedManager= Manager.Load(dbName, adminUser);
+
+            Assert.NotNull(loadedManager);
+            Assert.True(loadedManager.IsPasswordCorrect("Lupe", "constraseña1106"));
+            Assert.True(loadedManager.IsGrantedPrivilege("Lupe", "TablaX", Privilege.Select));
+            Assert.False(loadedManager.IsGrantedPrivilege("Lupe", "TablaX", Privilege.Delete));
+        }
+
+        [Fact]
+
+        public void testManagerSaveLoadMultiplePrivileges()
+        {
+            string dbName= "Numeros";
+            
+            Manager manager = new Manager("Admin");
+            Profile editorP = new Profile { Name = "Editor" };
+            editorP.Users.Add(new User("arara","ara123"));
+
+            editorP.GrantPrivilege("TablaY", Privilege.Select);
+            editorP.GrantPrivilege("TablaY", Privilege.Insert);
+            editorP.GrantPrivilege("TablaY", Privilege.Update);
+
+            manager.Profiles.Add(editorP);
+            manager.Save(dbName);
+
+            Manager loadedManager= Manager.Load(dbName, "Admin");
+
+            Assert.True(loadedManager.IsGrantedPrivilege("arara", "TablaY", Privilege.Select));
+            Assert.True(loadedManager.IsGrantedPrivilege("arara", "TablaY", Privilege.Insert));
+            Assert.True(loadedManager.IsGrantedPrivilege("arara", "TablaY", Privilege.Update));
+            Assert.False(loadedManager.IsGrantedPrivilege("arara", "TablaY", Privilege.Delete));
+        }
+
+        [Fact]
+
+        public void testLoadNonExistenFile()
+        {
+            Manager load= Manager.Load("BDInexistente", "admin");
+
+            Assert.NotNull(load);
+            Assert.Equal(0, load.Profiles.Count);
+        }
     }
 }
