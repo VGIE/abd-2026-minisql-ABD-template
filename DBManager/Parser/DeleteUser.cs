@@ -6,7 +6,7 @@ using DbManager.Security;
 
 namespace DbManager
 {
- 
+
     public class DeleteUser : MiniSqlQuery
     {
         public string Username { get; private set; }
@@ -14,42 +14,32 @@ namespace DbManager
         public DeleteUser(string username)
         {
             //TODO DEADLINE 4: Initialize member variables
-            Username= username;
-            
+            Username = username;
+
         }
         public string Execute(Database database)
         {
             //TODO DEADLINE 5: Run the query and return the appropriate message
             //UsersProfileIsNotGrantedRequiredPrivilege, UserDoesNotExistError, DeleteUserSuccess
 
-            User user= database.SecurityManager.UserByName(Username);
+            User user = database.SecurityManager.UserByName(Username);
 
-            if(user==null)
+            if (user == null)
             {
-                return "Error: Security profile does not exist";
-            }           
-
-
+                return Constants.UserDoesNotExistError;
+            }
             if (!database.SecurityManager.IsUserAdmin())
             {
-                return "Error: The security profile of the user does not have the required privilege to perform the operation";
-            }
-            
-            bool remove= database.SecurityManager.RemoveProfile(Username);
-
-              if(database.LastErrorMessage!=null)
-            {
-                return database.LastErrorMessage;
-            }
-            
-            if(!remove)
-            {
-                return "Security profile does not exist";
+                return Constants.UsersProfileIsNotGrantedRequiredPrivilege;
             }
 
-            
-            return "User deleted";
-            
+            Profile profile = database.SecurityManager.ProfileByUser(Username);
+            if (profile != null)
+            {
+                profile.Users.Remove(user);
+            }
+
+            return Constants.DeleteUserSuccess;
         }
 
     }

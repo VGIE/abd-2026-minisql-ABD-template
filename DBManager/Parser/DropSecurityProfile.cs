@@ -6,7 +6,7 @@ using DbManager.Security;
 
 namespace DbManager
 {
- 
+
     public class DropSecurityProfile : MiniSqlQuery
     {
         public string ProfileName { get; set; }
@@ -14,39 +14,35 @@ namespace DbManager
         public DropSecurityProfile(string profileName)
         {
             //TODO DEADLINE 4: Initialize member variables
-            ProfileName= profileName;
-            
+            ProfileName = profileName;
+
         }
         public string Execute(Database database)
         {
             //TODO DEADLINE 5: Run the query and return the appropriate message
             //UsersProfileIsNotGrantedRequiredPrivilege, SecurityProfileDoesNotExistError, DropSecurityProfileSuccess
 
-            Profile profile= database.SecurityManager.ProfileByName(ProfileName);
+            Profile profile = database.SecurityManager.ProfileByName(ProfileName);
 
-            if(profile==null)
+            if (profile == null)
             {
-                return "Error: Security profile does not exist";
+                return Constants.SecurityProfileDoesNotExistError;
             }
+
             if (!database.SecurityManager.IsUserAdmin())
             {
-                
-            }
-            bool remove= database.SecurityManager.RemoveProfile(ProfileName);
-
-             if(database.LastErrorMessage!=null)
-            {
-                return database.LastErrorMessage;
-            }
-            
-            if(!remove)
-            {
-                return "Error: Security profile does not exist";
+                return Constants.UsersProfileIsNotGrantedRequiredPrivilege;
             }
 
-            
-            return "Security profile dropped";
-            
+            bool remove = database.SecurityManager.RemoveProfile(ProfileName);
+
+            if (!remove)
+            {
+                return Constants.SecurityProfileDoesNotExistError;
+            }
+
+            return Constants.DropSecurityProfileSuccess;
+
         }
 
     }

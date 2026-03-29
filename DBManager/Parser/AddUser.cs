@@ -1,12 +1,13 @@
+using DbManager.Parser;
+using DbManager.Security;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using DbManager.Parser;
-using DbManager.Security;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DbManager
 {
- 
+
     public class AddUser : MiniSqlQuery
     {
         public string Username { get; private set; }
@@ -17,43 +18,32 @@ namespace DbManager
         public AddUser(string username, string password, string profileName)
         {
             //TODO DEADLINE 4: Initialize member variables
-            Username= username;
-            Password=password;
-            ProfileName=profileName;
-            
+            Username = username;
+            Password = password;
+            ProfileName = profileName;
+
         }
         public string Execute(Database database)
         {
             //TODO DEADLINE 5: Run the query and return the appropriate message
             //UsersProfileIsNotGrantedRequiredPrivilege, SecurityProfileDoesNotExistError, AddUserSuccess
-                
-             if (!database.SecurityManager.IsUserAdmin())
+
+            if (!database.SecurityManager.IsUserAdmin())
             {
-                return "Error: The security profile of the user does not have the required privilege to perform the operation";
+                return Constants.UsersProfileIsNotGrantedRequiredPrivilege;
             }
 
-            Profile profile= database.SecurityManager.ProfileByName(ProfileName);
-
-            if(profile==null)
+            Profile profile = database.SecurityManager.ProfileByName(ProfileName);
+            if (profile == null)
             {
-               return "Error: Security profile does not exist";
+                return Constants.SecurityProfileDoesNotExistError;
             }
 
-                User user= new User();
-                profile.Users.Add(user);
+            User user = new User(Username, Password);
+            profile.Users.Add(user);
 
-                database.SecurityManager.AddProfile(profile);
-            
-                
-             if(database.LastErrorMessage!=null)
-            {
-                return database.LastErrorMessage;
-            }
+            return Constants.AddUserSuccess;
 
-            
-            return "User added";
-            
         }
-
     }
 }

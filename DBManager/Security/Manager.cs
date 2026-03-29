@@ -77,7 +77,7 @@ namespace DbManager.Security
             {
                 Profile p = ProfileByUser(username);
 
-                if (p.Name == "Admin") {return true; }
+                if (p.Name == Profile.AdminProfileName) { return true; }
 
                 //Preguntar a borja si la tabla puede ser null
                 if (table == null)
