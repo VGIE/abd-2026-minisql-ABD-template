@@ -27,7 +27,9 @@ namespace DbManager
         //This constructor should only be used from Load (without needing to set a password for the user). It cannot be used from any other class
         private Database()
         {
-
+            //Lo usa load en el test para crear la bd sin poner contraseña
+            //Tables no estaba aún inicializada (es para evitar el NullReferenceException al cargar la bd))
+            Tables = new List<Table>();
         }
 
         public Database(string adminUsername, string adminPassword)
@@ -80,7 +82,7 @@ namespace DbManager
             //Do the same if no column is provided
             //If everything goes ok, set LastErrorMessage with the appropriate success message (Check Constants.cs)
 
-
+           
             if (TableByName(tableName) != null)
             {
                 LastErrorMessage = Constants.TableAlreadyExistsError;
@@ -129,6 +131,12 @@ namespace DbManager
             //DEADLINE 1.B: Insert a new row to the table. If it doesn't exist return false and set LastErrorMessage appropriately
             //If everything goes ok, set LastErrorMessage with the appropriate success message (Check Constants.cs)
 
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Insert))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return false;
+            }
+
             if (TableByName(tableName) == null)
             {
                 LastErrorMessage = Constants.TableDoesNotExistError;
@@ -151,6 +159,12 @@ namespace DbManager
             //DEADLINE 1.B: Return the result of the select. If the table doesn't exist return null and set LastErrorMessage appropriately (Check Constants.cs)
             //If any of the requested columns doesn't exist, return null and set LastErrorMessage (Check Constants.cs)
             //If everything goes ok, return the table
+
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Select))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return null;
+            }
 
             if (TableByName(tableName) == null)
             {
@@ -178,6 +192,12 @@ namespace DbManager
             //If the table or the column in the condition don't exist, return null and set LastErrorMessage (Check Constants.cs)
             //If everything goes ok, return true
 
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Delete))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return false;
+            }
+
             if (TableByName(tableName) == null)
             {
                 LastErrorMessage = Constants.TableDoesNotExistError;
@@ -201,6 +221,11 @@ namespace DbManager
             //If the table or the column in the condition don't exist, return null and set LastErrorMessage (Check Constants.cs)
             //If everything goes ok, return true
 
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Update))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return false;
+            }
             if (TableByName(tableName) == null)
             {
                 LastErrorMessage = Constants.TableDoesNotExistError;
@@ -288,8 +313,7 @@ namespace DbManager
             //If everything goes ok, return the loaded database (a new instance), null otherwise.
             //DEADLINE 5: When the Database object is created, set the username (create a new method if you must)
             //After loading the database, load the SecurityManager and check the password is correct. If it's not, return null. If it is return the database
-
-
+            
             try
             {
 
@@ -303,8 +327,10 @@ namespace DbManager
                 using (FileStream fs = new FileStream(databaseName, FileMode.Open))
                 using (BinaryReader reader = new BinaryReader(fs))
                 {
+                    
+                    string adminName = reader.ReadString();
 
-                    db.m_username = reader.ReadString();
+                    db.m_username = username;
 
                     int numTables = reader.ReadInt32();
 
@@ -415,9 +441,4 @@ namespace DbManager
         }
     }
 }
-
-
-
-
-
 

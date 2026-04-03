@@ -1,4 +1,5 @@
-﻿using DbManager.Security;
+﻿using DbManager;
+using DbManager.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -263,6 +264,31 @@ namespace OurTests.SecurityTest
 
             Assert.NotNull(load);
             Assert.Equal(0, load.Profiles.Count);
+        }
+        [Fact]
+        public void CheckPermissionsNotBeingAdminForRegularQueries()
+        {
+            string dbName = "SecurityManualTest";
+            Database db = Database.CreateTestDatabase(); 
+    
+            Profile p = new Profile { Name = "UserRole" };
+            p.Users.Add(new User("ara", "1234"));
+            db.SecurityManager.AddProfile(p);
+            db.Save(dbName);
+
+            Database dbAra = Database.Load(dbName, "ara", "1234");
+
+            Assert.NotNull(dbAra.SecurityManager);
+            Assert.NotNull(dbAra.TableByName(Table.TestTableName)); 
+            
+            string query = $"SELECT * FROM {Table.TestTableName}"; 
+    
+            string result = dbAra.ExecuteMiniSQLQuery(query);
+
+            Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, result);
+
+            File.Delete(dbName);
+            File.Delete(dbName + "_Security.json");
         }
     }
 }

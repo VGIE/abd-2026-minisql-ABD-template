@@ -26,8 +26,13 @@ namespace DbManager
         {
             //TODO DEADLINE 5: Run the query and return the appropriate message
             //UsersProfileIsNotGrantedRequiredPrivilege, SecurityProfileDoesNotExistError, RevokePrivilegeSuccess, 
-
             Profile profile= database.SecurityManager.ProfileByName(ProfileName);
+
+            if(!database.SecurityManager.IsUserAdmin())
+            {
+                return Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                
+            }
 
             if (profile==null)
             {
