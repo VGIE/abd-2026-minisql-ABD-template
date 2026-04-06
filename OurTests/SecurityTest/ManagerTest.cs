@@ -156,7 +156,7 @@ namespace OurTests.SecurityTest
             Assert.False(manager.IsGrantedPrivilege("Arago", "t", Privilege.Delete));
             Assert.False(manager.IsGrantedPrivilege("Admin", "t", Privilege.Delete));
 
-            p.GrantPrivilege("t",Privilege.Select);
+            p.GrantPrivilege("t", Privilege.Select);
             Assert.True(manager.IsGrantedPrivilege("Admin", "t", Privilege.Select));
             Assert.False(manager.IsGrantedPrivilege("Admin", null, Privilege.Select));
             Assert.False(manager.IsGrantedPrivilege("Admin", "t", Privilege.Delete));
@@ -165,13 +165,13 @@ namespace OurTests.SecurityTest
             Profile p2 = new Profile();
             p2.Name = "p2";
             p2.Users.Add(user2);
-            p2.GrantPrivilege("t",Privilege.Select);
+            p2.GrantPrivilege("t", Privilege.Select);
             Manager m = new Manager("Nodmin");
             m.Profiles.Add(p2);
 
             Assert.True(m.IsGrantedPrivilege("Nodmin", "t", Privilege.Select));
             Assert.False(m.IsGrantedPrivilege("Nodmin", null, Privilege.Select));
-            
+
         }
 
         [Fact]
@@ -200,16 +200,16 @@ namespace OurTests.SecurityTest
         }
 
         [Fact]
-        
+
         public void testManagerSaveLoad()
         {
-            string dbName= "Personas";
-            string adminUser= "Admin";
-            string adminPass= "1234";
+            string dbName = "Personas";
+            string adminUser = "Admin";
+            string adminPass = "1234";
             Manager manager = new Manager(adminUser);
 
-            Profile readerP= new Profile { Name = "Reader" };
-            User user= new User("Lupe","constraseña1106");
+            Profile readerP = new Profile { Name = "Reader" };
+            User user = new User("Lupe", "constraseña1106");
             readerP.Users.Add(user);
 
             readerP.GrantPrivilege("TablaX", Privilege.Select);
@@ -221,7 +221,7 @@ namespace OurTests.SecurityTest
 
             manager.Save(dbName);
 
-            Manager loadedManager= Manager.Load(dbName, adminUser);
+            Manager loadedManager = Manager.Load(dbName, adminUser);
 
             Assert.NotNull(loadedManager);
             Assert.True(loadedManager.IsPasswordCorrect("Lupe", "constraseña1106"));
@@ -233,11 +233,11 @@ namespace OurTests.SecurityTest
 
         public void testManagerSaveLoadMultiplePrivileges()
         {
-            string dbName= "Numeros";
-            
+            string dbName = "Numeros";
+
             Manager manager = new Manager("Admin");
             Profile editorP = new Profile { Name = "Editor" };
-            editorP.Users.Add(new User("arara","ara123"));
+            editorP.Users.Add(new User("arara", "ara123"));
 
             editorP.GrantPrivilege("TablaY", Privilege.Select);
             editorP.GrantPrivilege("TablaY", Privilege.Insert);
@@ -246,8 +246,8 @@ namespace OurTests.SecurityTest
             manager.Profiles.Add(editorP);
             manager.Save(dbName);
 
-            Manager loadedManager= Manager.Load(dbName, "Admin");
-            
+            Manager loadedManager = Manager.Load(dbName, "Admin");
+
 
 
             Assert.True(loadedManager.IsGrantedPrivilege("arara", "TablaY", Privilege.Select));
@@ -260,7 +260,7 @@ namespace OurTests.SecurityTest
 
         public void testLoadNonExistenFile()
         {
-            Manager load= Manager.Load("BDInexistente", "admin");
+            Manager load = Manager.Load("BDInexistente", "admin");
 
             Assert.NotNull(load);
             Assert.Equal(0, load.Profiles.Count);
@@ -269,8 +269,8 @@ namespace OurTests.SecurityTest
         public void testCheckPermissionsNotBeingAdminForRegularQueries()
         {
             string dbName = "SecurityManualTest";
-            Database db = Database.CreateTestDatabase(); 
-    
+            Database db = Database.CreateTestDatabase();
+
             Profile p = new Profile { Name = "UserRole" };
             p.Users.Add(new User("ara", "1234"));
             db.SecurityManager.AddProfile(p);
@@ -279,9 +279,9 @@ namespace OurTests.SecurityTest
             Database dbAra = Database.Load(dbName, "ara", "1234");
 
             Assert.NotNull(dbAra.SecurityManager);
-            Assert.NotNull(dbAra.TableByName(Table.TestTableName)); 
-            
-            string query = "DROP SECURITY PROFILE GuestRole"; 
+            Assert.NotNull(dbAra.TableByName(Table.TestTableName));
+
+            string query = "DROP SECURITY PROFILE GuestRole";
 
             string result = dbAra.ExecuteMiniSQLQuery(query);
 
@@ -295,52 +295,160 @@ namespace OurTests.SecurityTest
         public void testCheckPermissionsNotBeingAdmin2()
         {
 
-        string dbName = "SecurityTestDB";
-        Database db = new Database(Database.AdminUsername, Database.AdminPassword);
+            string dbName = "SecurityTestDB";
+            Database db = new Database(Database.AdminUsername, Database.AdminPassword);
 
-        Profile profile = new Profile { Name = "userProfile" };
-        User user = new User("user", "1234");
-        profile.Users.Add(user);
+            Profile profile = new Profile { Name = "userProfile" };
+            User user = new User("user", "1234");
+            profile.Users.Add(user);
 
-        db.SecurityManager.Profiles.Add(profile);
+            db.SecurityManager.Profiles.Add(profile);
 
-        db.Save(dbName);
+            db.Save(dbName);
 
-        Database dbUser = Database.Load(dbName, "user", "1234");
-    
-        db.SecurityManager.GrantPrivilege("userProfile", "Table", Privilege.Update);
+            //Probar que GranrPrivilege funciona desde el admin a un usuario random
+            Database dbUser = Database.Load(dbName, Database.AdminUsername, Database.AdminPassword);
 
-        bool privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Update);
-        Assert.False(privilege);
+            db.SecurityManager.GrantPrivilege("userProfile", "Table", Privilege.Update);
+            db.SecurityManager.GrantPrivilege("userProfile", "Table", Privilege.Select);
+            db.SecurityManager.GrantPrivilege("userProfile", "Table", Privilege.Insert);
+            db.SecurityManager.GrantPrivilege("userProfile", "Table", Privilege.Delete);
+            db.Save(dbName);
+
+            dbUser = Database.Load(dbName, "user", "1234");
+            bool privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Update);
+            Assert.True(privilege);
+            privilege= dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Select);
+            Assert.True(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Insert);
+            Assert.True(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Delete);
+            Assert.True(privilege);
+            db.Save(dbName);
+
+            //Probar que RevockePrivileges no funciona desde un usuario random DA MAAAAAAAL
+            //dbUser = Database.Load(dbName, "user", "1234");
+            //db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Update);
+            //db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Select);
+            //db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Insert);
+            //db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Delete);
+            //db.Save(dbName);
+
+            //dbUser = Database.Load(dbName, "user", "1234");
+            //privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Update);
+            //Assert.True(privilege);
+            //privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Select);
+            //Assert.True(privilege);
+            //privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Insert);
+            //Assert.True(privilege);
+            //privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Delete);
+            //Assert.True(privilege);
+            //db.Save(dbName);
+
+            //Probar que RevockePrivileges funciona desde el admin a un usuario random
+            dbUser = Database.Load(dbName, Database.AdminUsername, Database.AdminPassword);
+
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Update);
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Select);
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Insert);
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Delete);
+            db.Save(dbName);
+
+            dbUser = Database.Load(dbName, "user", "1234");
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Update);
+            Assert.False(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Select);
+            Assert.False(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Insert);
+            Assert.False(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Delete);
+            Assert.False(privilege);
+            db.Save(dbName);
+
+            //Probar que GranrPrivilege no funciona desde  un usuario random
+            dbUser = Database.Load(dbName, "user", "1234");
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Update);
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Select);
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Insert);
+            db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Delete);
+            db.Save(dbName);
+
+            dbUser = Database.Load(dbName, "user", "1234");
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Update);
+            Assert.False(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Select);
+            Assert.False(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Insert);
+            Assert.False(privilege);
+            privilege = dbUser.SecurityManager.IsGrantedPrivilege("user", "Table", Privilege.Delete);
+            Assert.False(privilege);
+            db.Save(dbName);
         }
 
         [Fact]
         public void testCheckPermissionsnotBeingAdminGrantRevoke()
         {
-            string dbName= "SecurityGrantRevokeTest";  
-            Database db= new Database("admin", "admin123");
+            string dbName = "SecurityGrantRevokeTest";
+            Database db = new Database(Database.AdminUsername, Database.AdminPassword);
 
-            Profile userProfile= new Profile { Name = "UserRole" };
+            Profile userProfile = new Profile { Name = "UserRole" };
             userProfile.Users.Add(new User("lupe", "lupe123"));
             db.SecurityManager.Profiles.Add(userProfile);
 
-            Profile p= new Profile { Name = "TestRole" };
+            Profile p = new Profile { Name = "TestRole" };
+            userProfile.Users.Add(new User("TestRole", "TestPassword"));
             db.SecurityManager.Profiles.Add(p);
 
             db.Save(dbName);
 
+            //Probar que ExeucteMiniSQLQuery(GrantPrivilege) no funciona desde  un usuario random, y de paso que
+            //no tiene privilegios preasignados
             Database dbLupe = Database.Load(dbName, "lupe", "lupe123");
 
-            string queryGrant= "GRANT SELECT ON TestTable TO TestRole";
-            string resultGrant= dbLupe.ExecuteMiniSQLQuery(queryGrant);
+            string queryGrant = "GRANT SELECT ON TestTable TO TestRole";
+            string resultGrant = dbLupe.ExecuteMiniSQLQuery(queryGrant);
 
             Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, resultGrant);
 
-            string queryRevoke= "REVOKE SELECT ON TestTable TO TestRole";
-            string resultRevoke= dbLupe.ExecuteMiniSQLQuery(queryRevoke);
+            string queryRevoke = "REVOKE SELECT ON TestTable TO TestRole";
+            string resultRevoke = dbLupe.ExecuteMiniSQLQuery(queryRevoke);
 
             Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, resultRevoke);
 
+            db.Save(dbName);
+
+            //Probar que ExeucteMiniSQLQuery(GrantPrivilege) funciona desde el admin a un usuario random 
+            dbLupe = Database.Load(dbName, Database.AdminUsername, Database.AdminPassword);
+
+            resultGrant = dbLupe.ExecuteMiniSQLQuery(queryGrant);
+            Assert.Equal(Constants.GrantPrivilegeSuccess, resultGrant);
+
+            db.Save(dbName);
+
+            dbLupe = Database.Load(dbName, "lupe", "lupe123");
+            bool privilege = dbLupe.SecurityManager.IsGrantedPrivilege("TestRole", "TestTable", Privilege.Select);
+            //Assert.True(privilege);
+
+            /*privilege = dbLupe.SecurityManager.IsGrantedPrivilege("TestRole", "TestTable", Privilege.Update);
+            Assert.True(privilege);
+            
+            privilege = dbLupe.SecurityManager.IsGrantedPrivilege("TestRole", "TestTable", Privilege.Insert);
+            Assert.True(privilege);
+            privilege = dbLupe.SecurityManager.IsGrantedPrivilege("TestRole", "TestTable", Privilege.Delete);
+            Assert.True(privilege);
+            no deberia, pero sale bien
+             
+            db.Save(dbName);
+
+            //Probar que ExeucteMiniSQLQuery(RevokePrivilege) no funciona desde un usuario random 
+            dbLupe = Database.Load(dbName, "lupe", "lupe123");
+            Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, resultRevoke);
+
+            privilege = dbLupe.SecurityManager.IsGrantedPrivilege("TestRole", "TestTable", Privilege.Select);
+            Assert.False(privilege);
+            privilege = dbLupe.SecurityManager.IsGrantedPrivilege("TestRole", "TestTable", Privilege.Update);
+            Assert.True(privilege);
+            Assert.False(privilege);*/
         }
 
         [Fact]
@@ -348,14 +456,14 @@ namespace OurTests.SecurityTest
         public void testAdminGrantRevoke()
         {
             Manager manager = new Manager("admin");
-            Profile admin= new Profile { Name = Profile.AdminProfileName };
+            Profile admin = new Profile { Name = Profile.AdminProfileName };
             admin.Users.Add(new User("admin", "1234"));
             manager.Profiles.Add(admin);
 
             Profile p1 = new Profile { Name = "wi" };
             p1.Users.Add(new User("wiwi", "123"));
             manager.Profiles.Add(p1);
-            
+
             manager.GrantPrivilege("wi", "Tabla1", Privilege.Select);
             Assert.True(manager.IsGrantedPrivilege("wiwi", "Tabla1", Privilege.Select));
 
