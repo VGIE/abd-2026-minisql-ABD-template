@@ -26,18 +26,18 @@ namespace DbManager
         public string Execute(Database database)
         {
             //TODO DEADLINE 5: Run the query and return the appropriate message
-            //UsersProfileIsNotGrantedRequiredPrivilege, SecurityProfileDoesNotExistError, AddUserSuccessç
+            //UsersProfileIsNotGrantedRequiredPrivilege, SecurityProfileDoesNotExistError, AddUserSuccess
+
+             if (!database.SecurityManager.IsUserAdmin())
+            {
+                return Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+            }
 
             Profile profile = database.SecurityManager.ProfileByName(ProfileName);
 
             if (profile == null)
             {
                 return Constants.SecurityProfileDoesNotExistError;
-            }
-
-            if (!database.SecurityManager.IsUserAdmin())
-            {
-                return Constants.UsersProfileIsNotGrantedRequiredPrivilege;
             }
 
             User user = new User(Username, Password);

@@ -15,6 +15,9 @@ namespace DbManager.Security
         public List<Profile> Profiles { get; private set; } = new List<Profile>();
 
         private string m_username;
+
+        //public string CurrentUsername { get; set; }
+
         public Manager(string username)
         {
             m_username = username;
@@ -24,7 +27,10 @@ namespace DbManager.Security
         {
             //TODO DEADLINE 5: Return true if the user logged-in (m_username) is the admin, false otherwise
             Profile p = ProfileByUser(m_username);
-            if (p == null) { return false; }
+            if (p == null) 
+            { 
+                return false;
+            }
 
             return p.Name == Profile.AdminProfileName;
         }

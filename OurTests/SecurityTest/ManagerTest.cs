@@ -326,7 +326,7 @@ namespace OurTests.SecurityTest
             Assert.True(privilege);
             db.Save(dbName);
 
-            //Probar que RevockePrivileges no funciona desde un usuario random DA MAAAAAAAL
+            //Probar que RevokePrivileges no funciona desde un usuario random DA MAAAAAAAL
             //dbUser = Database.Load(dbName, "user", "1234");
             //db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Update);
             //db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Select);
@@ -345,7 +345,7 @@ namespace OurTests.SecurityTest
             //Assert.True(privilege);
             //db.Save(dbName);
 
-            //Probar que RevockePrivileges funciona desde el admin a un usuario random
+            //Probar que RevokePrivileges funciona desde el admin a un usuario random
             dbUser = Database.Load(dbName, Database.AdminUsername, Database.AdminPassword);
 
             db.SecurityManager.RevokePrivilege("userProfile", "Table", Privilege.Update);
