@@ -20,6 +20,10 @@ namespace DbManager
         {
             //TODO DEADLINE 3: Run the query and return the appropriate message
             //DropTableSuccess or the last error in the database
+            if (!database.SecurityManager.IsUserAdmin())
+            {
+                return Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+            }
             database.DropTable(Table);
              if(database.LastErrorMessage!=null)
             {
