@@ -470,5 +470,120 @@ namespace OurTests.SecurityTest
             manager.RevokePrivilege("wi", "Tabla1", Privilege.Select);
             Assert.False(manager.IsGrantedPrivilege("wiwi", "Tabla1", Privilege.Select));
         }
+
+        [Fact]
+        public void CheckPermissionsNotBeingAdminForGrantAndRevoke()
+        {
+            string dbName = "testdb.bin";
+
+            Database db = new Database(Database.AdminUsername, Database.AdminPassword);
+
+            Profile profile = new Profile();
+            profile.Name = "userProfile";
+
+            User user = new User("user", "1234");
+            profile.Users.Add(user);
+
+            db.SecurityManager.Profiles.Add(profile);
+
+            db.SecurityManager.GrantPrivilege("userProfile", "People", Privilege.Select);
+
+            db.Save(dbName);
+
+            Database dbLoaded = Database.Load(dbName, "user", "1234");
+
+            Assert.NotNull(dbLoaded);
+
+            Revoke query = new Revoke("SELECT", "People", "userProfile");
+            string result = query.Execute(dbLoaded);
+
+            Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, result);
+        }
+        [Fact]
+        public void CheckPermissionsNotBeingAdminForRegularQueries()
+        {
+            string dbName = "testdb1.bin";
+
+            Database db = new Database(Database.AdminUsername, Database.AdminPassword);
+
+            db.CreateTable("People", new List<ColumnDefinition>
+            {
+                new ColumnDefinition(ColumnDefinition.DataType.String, "Name")
+            });
+
+            Profile profile = new Profile { Name = "userProfile" };
+            User user = new User("user", "1234");
+            profile.Users.Add(user);
+
+            db.SecurityManager.Profiles.Add(profile);
+
+            db.SecurityManager.GrantPrivilege("userProfile", "People", Privilege.Select);
+
+            db.Save(dbName);
+
+            Database dbLoaded = Database.Load(dbName, "user", "1234");
+            Assert.NotNull(dbLoaded);
+
+            Table result = dbLoaded.Select("People", new List<string> { "Name" }, null);
+
+            Assert.NotNull(result);
+        }
+        [Fact]
+        public void CheckPermissionsNotBeingAdminForGrantAndRevoke2()
+        {
+            string dbName = "testdb2.bin";
+
+            Database db = new Database(Database.AdminUsername, Database.AdminPassword);
+
+            Profile profile = new Profile { Name = "userProfile" };
+            User user = new User("user", "1234");
+            profile.Users.Add(user);
+
+            db.SecurityManager.Profiles.Add(profile);
+
+            db.Save(dbName);
+
+            Database dbLoaded = Database.Load(dbName, "user", "1234");
+            Assert.NotNull(dbLoaded);
+
+            dbLoaded.SecurityManager.GrantPrivilege("userProfile", "People", Privilege.Select);
+
+            bool hasPrivilege = dbLoaded.SecurityManager.IsGrantedPrivilege("user", "People", Privilege.Select);
+            Assert.False(hasPrivilege);
+
+            Revoke revoke = new Revoke("SELECT", "People", "userProfile");
+            string result = revoke.Execute(dbLoaded);
+
+            Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, result);
+        }
+        [Fact]
+        public void CheckPermissionsNotBeingAdminForSecurityProfileQueries()
+        {
+            string dbName = "testdb3.bin";
+
+            Database db = new Database(Database.AdminUsername, Database.AdminPassword);
+
+            Profile profile = new Profile { Name = "userProfile" };
+            User user = new User("user", "1234");
+            profile.Users.Add(user);
+
+            db.SecurityManager.Profiles.Add(profile);
+
+            db.Save(dbName);
+
+            Database dbLoaded = Database.Load(dbName, "user", "1234");
+            Assert.NotNull(dbLoaded);
+
+            CreateSecurityProfile create = new CreateSecurityProfile("newProfile");
+            string resultCreate = create.Execute(dbLoaded);
+
+            Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, resultCreate);
+
+            DropSecurityProfile drop = new DropSecurityProfile("userProfile");
+            string resultDrop = drop.Execute(dbLoaded);
+
+            Assert.Equal(Constants.UsersProfileIsNotGrantedRequiredPrivilege, resultDrop);
+        }
+
     }
 }
