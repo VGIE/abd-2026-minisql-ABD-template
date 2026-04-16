@@ -3,9 +3,11 @@ using DbManager.Security;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Enumeration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace DbManager
 {
@@ -16,61 +18,140 @@ namespace DbManager
 
         public string LastErrorMessage { get; private set; }
 
-        public Manager SecurityManager { get; private set; }
+        public Manager SecurityManager
+        {
+            get;
+            private set;
+        }
 
         //This constructor should only be used from Load (without needing to set a password for the user). It cannot be used from any other class
         private Database()
         {
+            //Lo usa load en el test para crear la bd sin poner contraseña
+            //Tables no estaba aún inicializada (es para evitar el NullReferenceException al cargar la bd))
+            Tables = new List<Table>();
         }
 
         public Database(string adminUsername, string adminPassword)
         {
             //DEADLINE 1.B: Initalize the member variables
-            
+            m_username = adminUsername;
+            SecurityManager = new Manager(m_username);
+
+            //Esto es para crear el perfil de admin con su usuario y contraseña para luego poder cargar la bd bien. 
+            //Si no, al cargar la bd el manager no tendría ni perfil ni usuario para comprobar la contraseña 
+            Profile adminProfile = new Profile{Name=Profile.AdminProfileName};
+            User adminUser = new User { Username = adminUsername, EncryptedPassword = Encryption.Encrypt(adminPassword) };
+            adminProfile.Users.Add(adminUser);
+
+            //Añadimos el perfil a manager 
+            SecurityManager.Profiles.Add(adminProfile);
+
         }
 
         public bool AddTable(Table table)
         {
             //DEADLINE 1.B: Add a new table to the database
-            
-            return false;
-            
+
+            if (table == null)
+                return false;
+
+            Tables.Add(table);
+            return true;
+
         }
 
         public Table TableByName(string tableName)
         {
             //DEADLINE 1.B: Find and return the table with the given name
-            
+            for (int i = 0; i < Tables.Count; i++)
+            {
+                if (Tables[i].Name == tableName)
+                {
+                    return Tables[i];
+                }
+            }
+
             return null;
-            
         }
 
         public bool CreateTable(string tableName, List<ColumnDefinition> ColumnDefinition)
         {
-            //DEADLINE 1.B: Create and new table with the given name and columns. If there is already a table with that name,
+            //DEADLINE 1.B: Create a new table with the given name and columns. If there is already a table with that name,
             //return false and set LastErrorMessage with the appropriate error (Check Constants.cs)
             //Do the same if no column is provided
             //If everything goes ok, set LastErrorMessage with the appropriate success message (Check Constants.cs)
-            
-            return false;
-            
+
+           
+            if (TableByName(tableName) != null)
+            {
+                LastErrorMessage = Constants.TableAlreadyExistsError;
+                return false;
+            }
+            else if (tableName == null || ColumnDefinition.Count() == 0)
+            {
+                LastErrorMessage = Constants.DatabaseCreatedWithoutColumnsError;
+                return false;
+            }
+            else
+            {
+                Table newTable = new Table(tableName, ColumnDefinition);
+                Tables.Add(newTable);
+                LastErrorMessage = Constants.CreateTableSuccess;
+                return true;
+            }
+
         }
 
         public bool DropTable(string tableName)
         {
             //DEADLINE 1.B: Delete the table with the given name. If the table doesn't exist, return false and set LastErrorMessage
             //If everything goes ok, return true and set LastErrorMessage with the appropriate success message (Check Constants.cs)
-            
-            return false;
+
+            if (TableByName(tableName) == null)
+            {
+                LastErrorMessage = Constants.TableDoesNotExistError;
+                return false;
+            }
+
+            List<Table> remove = new List<Table>();
+            remove.Add(TableByName(tableName));
+
+            foreach (Table table in remove)
+            {
+                Tables.Remove(table);
+            }
+            LastErrorMessage = Constants.DropTableSuccess;
+            return true;
+
         }
 
         public bool Insert(string tableName, List<string> values)
         {
             //DEADLINE 1.B: Insert a new row to the table. If it doesn't exist return false and set LastErrorMessage appropriately
             //If everything goes ok, set LastErrorMessage with the appropriate success message (Check Constants.cs)
-            
-            return false;
-            
+
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Insert))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return false;
+            }
+
+            if (TableByName(tableName) == null)
+            {
+                LastErrorMessage = Constants.TableDoesNotExistError;
+                return false;
+            }
+            if (values == null || values.Count != TableByName(tableName).NumColumns())
+            {
+                LastErrorMessage = Constants.ColumnCountsDontMatch;
+                return false;
+            }
+
+            TableByName(tableName).Insert(values);
+            LastErrorMessage = Constants.InsertSuccess;
+            return true;
+
         }
 
         public Table Select(string tableName, List<string> columns, Condition condition)
@@ -78,9 +159,31 @@ namespace DbManager
             //DEADLINE 1.B: Return the result of the select. If the table doesn't exist return null and set LastErrorMessage appropriately (Check Constants.cs)
             //If any of the requested columns doesn't exist, return null and set LastErrorMessage (Check Constants.cs)
             //If everything goes ok, return the table
-            
-            return null;
-            
+
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Select))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return null;
+            }
+
+            if (TableByName(tableName) == null)
+            {
+                LastErrorMessage = Constants.TableDoesNotExistError;
+                return null;
+            }
+
+            for (int i = 0; i < columns.Count; i++)
+            {
+                if (TableByName(tableName).ColumnByName(columns[i]) == null)
+                {
+                    LastErrorMessage = Constants.ColumnDoesNotExistError;
+                    return null;
+                }
+            }
+           
+            Table table = TableByName(tableName).Select(columns, condition);
+            return table;
+
         }
 
         public bool DeleteWhere(string tableName, Condition columnCondition)
@@ -88,9 +191,28 @@ namespace DbManager
             //DEADLINE 1.B: Delete all the rows where the condition is true. 
             //If the table or the column in the condition don't exist, return null and set LastErrorMessage (Check Constants.cs)
             //If everything goes ok, return true
-            
-            return false;
-            
+
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Delete))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return false;
+            }
+
+            if (TableByName(tableName) == null)
+            {
+                LastErrorMessage = Constants.TableDoesNotExistError;
+                return false;
+            }
+            else if (TableByName(tableName).ColumnByName(columnCondition.ColumnName) == null)
+            {
+                LastErrorMessage = Constants.ColumnDoesNotExistError;
+                return false;
+            }
+
+            TableByName(tableName).DeleteWhere(columnCondition);
+            LastErrorMessage = Constants.DeleteSuccess;
+            return true;
+
         }
 
         public bool Update(string tableName, List<SetValue> columnNames, Condition columnCondition)
@@ -98,23 +220,91 @@ namespace DbManager
             //DEADLINE 1.B: Update in the given table all the rows where the condition is true using the SetValues
             //If the table or the column in the condition don't exist, return null and set LastErrorMessage (Check Constants.cs)
             //If everything goes ok, return true
-            
-            return false;
-            
+
+            if (!SecurityManager.IsGrantedPrivilege(m_username, tableName, Privilege.Update))
+            {
+                LastErrorMessage = Constants.UsersProfileIsNotGrantedRequiredPrivilege;
+                return false;
+            }
+            if (TableByName(tableName) == null)
+            {
+                LastErrorMessage = Constants.TableDoesNotExistError;
+                return false;
+            }
+            else if (columnCondition == null)
+            {
+                LastErrorMessage = Constants.SyntaxError;
+                return false;
+            }
+            else if (TableByName(tableName).ColumnByName(columnCondition.ColumnName) == null)
+            {
+                LastErrorMessage = Constants.ColumnDoesNotExistError;
+                return false;
+            }
+
+            TableByName(tableName).Update(columnNames, columnCondition);
+            LastErrorMessage = Constants.UpdateSuccess;
+            return true;
+
         }
 
-        
-        
-
-        
         public bool Save(string databaseName)
         {
             //DEADLINE 1.C: Save this database to disk with the given name
             //If everything goes ok, return true, false otherwise.
             //DEADLINE 5: Save the SecurityManager so that it can be loaded with the database in Load()
-            
-            return false;
-            
+
+            try
+            {
+                using (FileStream fs = new FileStream(databaseName, FileMode.Create))
+                using (BinaryWriter writer = new BinaryWriter(fs))
+                {
+                    writer.Write(m_username);
+
+                    writer.Write(Tables.Count);
+
+                    for (int i = 0; i < Tables.Count; i++)
+                    {
+                        Table table = Tables[i];
+
+                        writer.Write(table.Name);
+
+                        writer.Write(table.NumColumns());
+
+                        for (int c = 0; c < table.NumColumns(); c++)
+                        {
+                            ColumnDefinition col = table.GetColumn(c);
+
+                            writer.Write(col.Name);
+                            writer.Write(col.Type.ToString());
+
+                        }
+
+                        writer.Write(table.NumRows());
+                        for (int r = 0; r < table.NumRows(); r++)
+                        {
+                            Row row = table.GetRow(r);
+                            List<string> rowValues = row.Values;
+                            writer.Write(rowValues.Count);
+
+                            for (int v = 0; v < rowValues.Count; v++)
+                            {
+                                writer.Write(rowValues[v]);
+                            }
+                        }
+                    }
+                }
+                SecurityManager.Save(databaseName);
+                return true;
+
+            }
+            catch
+            {
+                return false;
+            }
+
+
+
         }
 
         public static Database Load(string databaseName, string username, string password)
@@ -124,7 +314,79 @@ namespace DbManager
             //DEADLINE 5: When the Database object is created, set the username (create a new method if you must)
             //After loading the database, load the SecurityManager and check the password is correct. If it's not, return null. If it is return the database
             
-            return null;
+            try
+            {
+
+                Manager manager = Manager.Load(databaseName, username);
+                if (manager == null || !manager.IsPasswordCorrect(username, password))
+                {
+                    return null;
+                }
+
+                Database db = new Database();
+                using (FileStream fs = new FileStream(databaseName, FileMode.Open))
+                using (BinaryReader reader = new BinaryReader(fs))
+                {
+                    
+                    string adminName = reader.ReadString();
+
+                    db.m_username = username;
+
+                    int numTables = reader.ReadInt32();
+
+                    for (int i = 0; i < numTables; i++)
+                    {
+                        string tableName = reader.ReadString();
+
+                        int columnCount = reader.ReadInt32();
+
+                        List<ColumnDefinition> columns = new List<ColumnDefinition>();
+
+                        for (int c = 0; c < columnCount; c++)
+                        {
+
+                            string columnName = reader.ReadString();
+                            string columnTypeString = reader.ReadString();
+
+                            ColumnDefinition.DataType type = (ColumnDefinition.DataType)Enum.Parse(typeof(ColumnDefinition.DataType), columnTypeString);
+                            columns.Add(new ColumnDefinition(type, columnName));
+                        }
+
+                        Table table = new Table(tableName, columns);
+
+                        int rowCount = reader.ReadInt32();
+
+                        for (int r = 0; r < rowCount; r++)
+                        {
+                            int valueCount = reader.ReadInt32();
+
+                            List<string> values = new List<string>();
+
+                            for (int v = 0; v < valueCount; v++)
+                            {
+                                values.Add(reader.ReadString());
+
+                            }
+                            table.Insert(values);
+                        }
+
+                        db.Tables.Add(table);
+
+                    }
+
+                }
+               
+                db.SecurityManager=manager;
+                
+                return db;
+
+
+            }
+            catch
+            {
+                return null;
+            }
+
         }
 
         public string ExecuteMiniSQLQuery(string query)
@@ -134,7 +396,10 @@ namespace DbManager
 
             //If the parser returns null, there must be a syntax error (or the parser is failing)
             if (miniSQLQuery == null)
+            {
+                LastErrorMessage = Constants.SyntaxError;
                 return Constants.SyntaxError;
+            }
 
             //Once the query is parsed, we run it on this database
             return miniSQLQuery.Execute(this);
@@ -145,9 +410,6 @@ namespace DbManager
         {
             return SecurityManager.IsUserAdmin();
         }
-
-
-
 
 
         //All these methods are ONLY FOR TESTING. Use them to simplify creating unit tests:
@@ -179,8 +441,4 @@ namespace DbManager
         }
     }
 }
-
-
-
-
 

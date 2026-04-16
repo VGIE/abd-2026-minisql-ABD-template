@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DbManager.Security
@@ -12,29 +13,56 @@ namespace DbManager.Security
         public string Name { get; set; }
         public List<User> Users { get; set; } = new List<User>();
 
+        [JsonInclude]
         public Dictionary<string, List<Privilege>> PrivilegesOn { get; private set; } = new Dictionary<string, List<Privilege>>();
 
         public bool GrantPrivilege(string table, Privilege privilege)
         {
             //TODO DEADLINE 5: Grant this privilege on this table. Return false if there is an error, true otherwise
-            
+
+            List<Privilege> privileges = new List<Privilege>();
+            if (!PrivilegesOn.ContainsKey(table))
+            {
+                PrivilegesOn[table] = new List<Privilege>();
+            }
+            if (!PrivilegesOn[table].Contains(privilege))
+            {
+                PrivilegesOn[table].Add(privilege);
+                return true;
+            }
+
             return false;
-            
+
         }
 
         public bool RevokePrivilege(string table, Privilege privilege)
         {
             //TODO DEADLINE 5: Revoke this privilege on this table. Return false if there is an error, true otherwise
-            
-            return false;
-            
+            if (!PrivilegesOn.ContainsKey(table))
+            {
+                return false;
+            }
+            if (!PrivilegesOn[table].Contains(privilege))
+            {
+                return false;
+            }
+            PrivilegesOn[table].Remove(privilege);
+            return true;
+
         }
 
         public bool IsGrantedPrivilege(string table, Privilege privilege)
         {
             //TODO DEADLINE 5: Return whether this profile is granted this privilege on this table
-            
-            return false;
+            if (!PrivilegesOn.ContainsKey(table))
+            {
+                return false;
+            }
+            if (!PrivilegesOn[table].Contains(privilege))
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

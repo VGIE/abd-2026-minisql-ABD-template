@@ -13,6 +13,8 @@ namespace DbManager
         public Insert(string table, List<string> values)
         {
             //TODO DEADLINE 2: Initialize member variables
+            Table= table; 
+            Values= values;
             
         }
 
@@ -20,8 +22,16 @@ namespace DbManager
         {
             //TODO DEADLINE 3: Run the query and return the appropriate message
             //InsertSuccess or the last error in the database
+
             
-            return null;
+            database.Insert(Table, Values);
+
+            if(database.LastErrorMessage!=null)
+            {
+                return database.LastErrorMessage;
+            }
+            
+            return Constants.InsertSuccess;
             
         }
     }
